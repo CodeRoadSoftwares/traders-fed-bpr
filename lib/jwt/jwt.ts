@@ -10,33 +10,49 @@ export interface JwtToken {
 }
 
 export function signAccessToken(user: JwtPayload) {
+  const secret = process.env.ACCESS_SECRET;
+  if (!secret) {
+    throw new Error("ACCESS_SECRET is not defined in environment variables");
+  }
   return jwt.sign(
     {
       id: user._id,
       role: user.role,
     },
-    process.env.ACCESS_SECRET!,
+    secret,
     { expiresIn: "15m" },
   );
 }
 
 export function signRefreshToken(user: JwtPayload) {
+  const secret = process.env.REFRESH_SECRET;
+  if (!secret) {
+    throw new Error("REFRESH_SECRET is not defined in environment variables");
+  }
   return jwt.sign(
     {
       id: user._id,
       role: user.role,
     },
-    process.env.REFRESH_SECRET!,
+    secret,
     { expiresIn: "15d" },
   );
 }
 
 export function verifyAccess(token: string) {
-  return jwt.verify(token, process.env.ACCESS_SECRET!) as JwtToken;
+  const secret = process.env.ACCESS_SECRET;
+  if (!secret) {
+    throw new Error("ACCESS_SECRET is not defined in environment variables");
+  }
+  return jwt.verify(token, secret) as JwtToken;
 }
 
 export function verifyRefresh(token: string): JwtToken {
-  return jwt.verify(token, process.env.REFRESH_SECRET!) as JwtToken;
+  const secret = process.env.REFRESH_SECRET;
+  if (!secret) {
+    throw new Error("REFRESH_SECRET is not defined in environment variables");
+  }
+  return jwt.verify(token, secret) as JwtToken;
 }
 
 export function generateTokens(_id: string, role: string) {
