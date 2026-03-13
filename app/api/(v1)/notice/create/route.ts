@@ -1,11 +1,10 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import Notice from "@/models/notice.model";
+import { Notice, User } from "@/lib/db/models";
 import { INotice, noticeSchema } from "@/validation/notice/notice.validation";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import { sendEmail, generateUrgentNoticeEmail } from "@/lib/email/email";
-import User from "@/models/user.model";
 
 export async function POST(req: Request) {
   try {

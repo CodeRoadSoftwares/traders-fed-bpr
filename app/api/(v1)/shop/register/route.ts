@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/auth/getUser";
 import { generateCertificateNumber } from "@/lib/certificate/genCertificate";
 import { connectDb } from "@/lib/db/db";
-import Shop from "@/models/shop.model";
+import { Shop } from "@/lib/db/models";
 import { IShop, shopSchema } from "@/validation/shop/shop.validation";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";

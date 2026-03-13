@@ -1,6 +1,6 @@
 import { connectDb } from "@/lib/db/db";
 import { sendEmail, generateRenewalReminderEmail } from "@/lib/email/email";
-import Shop from "@/models/shop.model";
+import { Shop } from "@/lib/db/models";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import User from "@/models/user.model";
+import { User } from "@/lib/db/models";
 import { adminSchema, IAdmin } from "@/validation/admin/admin.validation";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";

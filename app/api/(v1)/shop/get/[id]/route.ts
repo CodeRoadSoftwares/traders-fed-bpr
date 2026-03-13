@@ -1,5 +1,5 @@
 import { connectDb } from "@/lib/db/db";
-import Shop from "@/models/shop.model";
+import { Shop } from "@/lib/db/models";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 

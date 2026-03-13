@@ -1,6 +1,6 @@
 import { connectDb } from "@/lib/db/db";
 import { generateTokens } from "@/lib/jwt/jwt";
-import User from "@/models/user.model";
+import { User } from "@/lib/db/models";
 import { ISignin, signinValidation } from "@/validation/user/user.validation";
 import { compare } from "bcrypt";
 import { NextResponse } from "next/server";

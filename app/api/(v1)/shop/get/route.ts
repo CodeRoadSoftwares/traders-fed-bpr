@@ -1,5 +1,5 @@
 import { connectDb } from "@/lib/db/db";
-import Shop from "@/models/shop.model";
+import { Shop } from "@/lib/db/models";
 import { NextRequest, NextResponse } from "next/server";
 import { PipelineStage } from "mongoose";
 
@@ -15,7 +15,11 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const match: Record<string, unknown> = {};
-    if (status) match.certificateStatus = status;
+    if (status) {
+      match.certificateStatus = status;
+    } else {
+      match.certificateStatus = "ACTIVE";
+    }
     if (category) match.category = category;
 
     const pipeline: PipelineStage[] = [
@@ -93,6 +97,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ message: error }, { status: 500 });
+    console.error("Shop fetch error:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch shops", error: String(error) },
+      { status: 500 },
+    );
   }
 }

@@ -1,9 +1,6 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import Shop from "@/models/shop.model";
-import User from "@/models/user.model";
-import Notice from "@/models/notice.model";
-import Fund from "@/models/fund.model";
+import { Shop, User, Notice, Fund } from "@/lib/db/models";
 import { NextResponse } from "next/server";
 
 export async function GET() {

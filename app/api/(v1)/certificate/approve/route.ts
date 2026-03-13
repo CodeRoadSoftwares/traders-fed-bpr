@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import Shop from "@/models/shop.model";
+import { Shop } from "@/lib/db/models";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 

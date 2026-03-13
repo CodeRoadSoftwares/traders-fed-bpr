@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import Fund from "@/models/fund.model";
+import { Fund } from "@/lib/db/models";
 import { fundSchema, IFund } from "@/validation/fund/fund.validation";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";

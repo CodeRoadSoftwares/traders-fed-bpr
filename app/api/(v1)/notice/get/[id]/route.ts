@@ -1,5 +1,5 @@
 import { connectDb } from "@/lib/db/db";
-import Notice from "@/models/notice.model";
+import { Notice, User } from "@/lib/db/models";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 

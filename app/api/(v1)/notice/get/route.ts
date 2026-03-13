@@ -1,12 +1,18 @@
 import { getUser } from "@/lib/auth/getUser";
 import { connectDb } from "@/lib/db/db";
-import Notice from "@/models/notice.model";
+import { Notice } from "@/lib/db/models";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
     await connectDb();
-    const user = await getUser();
+    let user = null;
+    try {
+      user = await getUser();
+    } catch {
+      user = null;
+    }
+
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 10;
     const search = req.nextUrl.searchParams.get("search");
@@ -52,6 +58,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ message: error }, { status: 500 });
+    console.error("Notice fetch error:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch notices", error: String(error) },
+      { status: 500 },
+    );
   }
 }
