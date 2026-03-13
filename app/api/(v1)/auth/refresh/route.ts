@@ -36,6 +36,9 @@ export async function POST(req: NextRequest) {
     });
     return res;
   } catch (error) {
-    return NextResponse.json({ message: error }, { status: 500 });
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Failed to refresh" },
+      { status: 500 },
+    );
   }
 }
