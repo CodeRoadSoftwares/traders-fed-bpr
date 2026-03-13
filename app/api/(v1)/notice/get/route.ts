@@ -9,11 +9,28 @@ export async function GET(req: NextRequest) {
     const user = await getUser();
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 10;
+    const search = req.nextUrl.searchParams.get("search");
+    const startDate = req.nextUrl.searchParams.get("startDate");
+    const endDate = req.nextUrl.searchParams.get("endDate");
     const skip = (page - 1) * limit;
 
     const match: Record<string, unknown> = {};
     if (!user || user.role === "SHOP") {
       match.visibility = { $in: ["PUBLIC", "SHOPS"] };
+    }
+
+    if (startDate || endDate) {
+      const dateFilter: Record<string, Date> = {};
+      if (startDate) dateFilter.$gte = new Date(startDate);
+      if (endDate) dateFilter.$lte = new Date(endDate);
+      match.createdAt = dateFilter;
+    }
+
+    if (search) {
+      match.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { message: { $regex: search, $options: "i" } },
+      ];
     }
 
     const [data, total] = await Promise.all([
