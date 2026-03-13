@@ -3,7 +3,7 @@ import { Schema, Types, model, models } from "mongoose";
 
 const shopSchema = new Schema(
   {
-    userId: { type: Types.ObjectId, ref: "user", required: true, unique: true },
+    userId: { type: Types.ObjectId, ref: "User", required: true, unique: true },
     registrationNumber: { type: String, required: true, unique: true },
     licenseNumber: { type: String, required: true, unique: true },
     category: {
@@ -24,7 +24,7 @@ const shopSchema = new Schema(
       enum: ["PENDING", "ACTIVE", "REJECTED", "EXPIRED"],
       default: "PENDING",
     },
-    actionBy: { type: Types.ObjectId, ref: "user" },
+    actionBy: { type: Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );
