@@ -1,4 +1,4 @@
-import User from "@/models/user.model";
+import { User } from "@/lib/db/models";
 import { hash } from "bcrypt";
 import { connect } from "mongoose";
 import "dotenv/config";
