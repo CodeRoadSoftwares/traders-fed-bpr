@@ -4,6 +4,8 @@ import Notice from "@/models/notice.model";
 import { INotice, noticeSchema } from "@/validation/notice/notice.validation";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
+import { sendEmail, generateUrgentNoticeEmail } from "@/lib/email/email";
+import User from "@/models/user.model";
 
 export async function POST(req: Request) {
   try {
@@ -25,6 +27,23 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    if (parsedData.urgent) {
+      const users = await User.find({ role: "SHOP" }).select("email name");
+      const emailHtml = generateUrgentNoticeEmail(
+        parsedData.title,
+        parsedData.message,
+      );
+
+      for (const shopUser of users) {
+        await sendEmail({
+          to: shopUser.email,
+          subject: `🚨 Urgent Notice: ${parsedData.title}`,
+          html: emailHtml,
+        });
+      }
+    }
+
     return NextResponse.json(
       { message: "notice created successfully", data: notice },
       { status: 201 },
