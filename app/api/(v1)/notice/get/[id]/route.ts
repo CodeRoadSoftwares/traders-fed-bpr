@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await connectDb();
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { message: "Invalid notice id" },
