@@ -1,5 +1,5 @@
 import { ShopCategory } from "@/constants/categories";
-import { Schema, Types, model } from "mongoose";
+import { Schema, Types, model, models } from "mongoose";
 
 const shopSchema = new Schema(
   {
@@ -29,5 +29,5 @@ const shopSchema = new Schema(
   { timestamps: true },
 );
 
-const Shop = model("Shop", shopSchema);
+const Shop = models.Shop || model("Shop", shopSchema);
 export default Shop;

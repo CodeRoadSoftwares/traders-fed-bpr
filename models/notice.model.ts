@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { Schema, Types, model, models } from "mongoose";
 
 const noticeSchema = new Schema(
   {
@@ -11,5 +11,5 @@ const noticeSchema = new Schema(
   { timestamps: true },
 );
 
-const Notice = model("Notice", noticeSchema);
+const Notice = models.Notice || model("Notice", noticeSchema);
 export default Notice;

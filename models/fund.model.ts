@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { Schema, Types, model, models } from "mongoose";
 
 const fundSchema = new Schema(
   {
@@ -12,5 +12,5 @@ const fundSchema = new Schema(
   { timestamps: true },
 );
 
-const Fund = model("Fund", fundSchema);
+const Fund = models.Fund || model("Fund", fundSchema);
 export default Fund;
