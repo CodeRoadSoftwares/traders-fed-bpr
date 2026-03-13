@@ -7,7 +7,7 @@ const fundSchema = new Schema(
     amount: { type: Number, required: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
-    createdBy: { type: Types.ObjectId, ref: "user", required: true },
+    createdBy: { type: Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true },
 );

@@ -2,7 +2,7 @@ import { Schema, Types, model, models } from "mongoose";
 
 const noticeSchema = new Schema(
   {
-    createdBy: { type: Types.ObjectId, ref: "user", required: true },
+    createdBy: { type: Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
     message: { type: String, required: true },
     visibility: { type: String, enum: ["PUBLIC", "SHOPS"], required: true },
