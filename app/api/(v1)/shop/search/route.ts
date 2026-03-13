@@ -59,6 +59,8 @@ export async function GET(req: NextRequest) {
       {
         $project: {
           category: 1,
+          photos: 1,
+          location: 1,
           certificateNumber: 1,
           certificateStatus: 1,
           "user.name": 1,

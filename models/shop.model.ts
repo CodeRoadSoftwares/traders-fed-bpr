@@ -11,6 +11,11 @@ const shopSchema = new Schema(
       enum: Object.values(ShopCategory),
       required: true,
     },
+    photos: [{ type: String }],
+    location: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+    },
     certificateNumber: { type: String, required: true, unique: true },
     certificateIssuedAt: { type: Date },
     certificateExpiryDate: { type: Date },
@@ -19,7 +24,7 @@ const shopSchema = new Schema(
       enum: ["PENDING", "ACTIVE", "REJECTED", "EXPIRED"],
       default: "PENDING",
     },
-    actionBy: { type: Types.ObjectId, ref: "user", unique: true },
+    actionBy: { type: Types.ObjectId, ref: "user" },
   },
   { timestamps: true },
 );

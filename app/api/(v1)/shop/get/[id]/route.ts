@@ -29,6 +29,8 @@ export async function GET(
           registrationNumber: 1,
           licenseNumber: 1,
           category: 1,
+          photos: 1,
+          location: 1,
           certificateNumber: 1,
           certificateStatus: 1,
           certificateIssuedAt: 1,
