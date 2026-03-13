@@ -14,7 +14,6 @@ export default async function createSuperAdmin() {
     const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD!;
     const SUPER_ADMIN_PHONE = process.env
       .SUPER_ADMIN_PHONE as unknown as number;
-    const SUPER_ADMIN_ADDRESS = process.env.SUPER_ADMIN_ADDRESS!;
     const SUPER_ADMIN_NAME = process.env.SUPER_ADMIN_NAME!;
 
     const hashedPassword = await hash(SUPER_ADMIN_PASSWORD, 10);
@@ -22,7 +21,6 @@ export default async function createSuperAdmin() {
       name: SUPER_ADMIN_NAME,
       email: SUPER_ADMIN_EMAIL,
       password: hashedPassword,
-      address: SUPER_ADMIN_ADDRESS,
       phone: SUPER_ADMIN_PHONE,
       role: "SUPER_ADMIN",
     });
