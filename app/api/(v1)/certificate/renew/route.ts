@@ -17,12 +17,6 @@ export async function POST(req: Request) {
     if (!shop) {
       return NextResponse.json({ message: "shop not found" }, { status: 404 });
     }
-    if (shop.certificateStatus !== "ACTIVE") {
-      return NextResponse.json(
-        { message: "only active certificates can be renewed" },
-        { status: 400 },
-      );
-    }
     const issuedAt = new Date();
     const expiryDate = new Date(
       new Date().getFullYear() + 1,
@@ -37,6 +31,7 @@ export async function POST(req: Request) {
       {
         certificateIssuedAt: issuedAt,
         certificateExpiryDate: expiryDate,
+        certificateStatus: "ACTIVE",
         actionBy: new Types.ObjectId(user.id),
       },
       { new: true },
