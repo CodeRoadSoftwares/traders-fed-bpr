@@ -1,0 +1,294 @@
+"use client";
+import { useState } from "react";
+import { useUser } from "@/hooks/useUser";
+import { useFunds } from "@/hooks/useFunds";
+import CreateFundModal from "@/components/funds/CreateFundModal";
+import {
+  Icon,
+  IC,
+  Sk,
+  StatusBadge,
+  Pagination,
+  Empty,
+  Btn,
+} from "@/components/ui";
+import apiClient from "@/lib/axios/apiClient";
+
+function SummaryCards({
+  income,
+  expense,
+  loading,
+}: {
+  income: number;
+  expense: number;
+  loading: boolean;
+}) {
+  const balance = income - expense;
+  const items = [
+    {
+      label: "Total Income",
+      value: income,
+      color: "text-primary-600",
+      bg: "bg-primary-50",
+      border: "border-primary-100",
+      icon: IC.fund,
+    },
+    {
+      label: "Total Expense",
+      value: expense,
+      color: "text-danger-600",
+      bg: "bg-danger-50",
+      border: "border-danger-100",
+      icon: IC.fund,
+    },
+    {
+      label: "Net Balance",
+      value: balance,
+      color: balance >= 0 ? "text-primary-600" : "text-danger-600",
+      bg: balance >= 0 ? "bg-primary-50" : "bg-danger-50",
+      border: balance >= 0 ? "border-primary-100" : "border-danger-100",
+      icon: IC.fund,
+    },
+  ];
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {items.map((s) => (
+        <div
+          key={s.label}
+          className={`${s.bg} border ${s.border} rounded-xl p-5`}
+        >
+          <div
+            className={`w-9 h-9 bg-white rounded-lg flex items-center justify-center mb-3 ${s.color}`}
+          >
+            <Icon d={s.icon} className="w-4.5 h-4.5" />
+          </div>
+          <p className="text-xs text-gray-500 mb-1">{s.label}</p>
+          {loading ? (
+            <Sk className="h-7 w-24" />
+          ) : (
+            <p className={`text-2xl font-bold ${s.color}`}>
+              {balance < 0 && s.label === "Net Balance" ? "−" : ""}₹
+              {Math.abs(s.value).toLocaleString("en-IN")}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function FundsDashboard() {
+  const { user } = useUser();
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const { funds, pagination, loading, deleteFund } = useFunds({
+    page,
+    type,
+    limit: 15,
+  });
+
+  const income = funds
+    .filter((f) => f.type === "INCOME")
+    .reduce((s, f) => s + f.amount, 0);
+  const expense = funds
+    .filter((f) => f.type === "EXPENSE")
+    .reduce((s, f) => s + f.amount, 0);
+
+  const handleReport = async () => {
+    try {
+      const r = await apiClient.get("/fund/report/pdf", {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(
+        new Blob([r.data], { type: "application/pdf" }),
+      );
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "funds-report.pdf";
+      a.click();
+    } catch {
+      alert("Failed to generate report");
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+          <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
+            Transparency
+          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Funds Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {isAdmin
+              ? "Manage income and expense entries, generate reports"
+              : "Complete record of federation income and expenditure — updated in real time"}
+          </p>
+        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <Btn variant="secondary" onClick={handleReport}>
+              <Icon d={IC.download} className="w-4 h-4" /> PDF Report
+            </Btn>
+            <Btn onClick={() => setShowModal(true)}>
+              <Icon d={IC.plus} className="w-4 h-4" /> Add Entry
+            </Btn>
+          </div>
+        )}
+      </div>
+
+      {!user && (
+        <div className="flex items-start gap-3 px-4 py-3.5 bg-primary-50 border border-primary-100 rounded-xl text-sm text-primary-700 mb-6">
+          <Icon d={IC.shield} className="w-4 h-4 shrink-0 mt-0.5" />
+          <p>
+            This is a public transparency record. All income and expenses of the
+            Traders Federation are listed here for member and public
+            accountability.
+          </p>
+        </div>
+      )}
+
+      <div className="mb-6">
+        <SummaryCards income={income} expense={expense} loading={loading} />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex items-center gap-3">
+        <p className="text-sm text-gray-500 shrink-0">Filter by:</p>
+        <div className="flex gap-2">
+          {[
+            ["", "All"],
+            ["INCOME", "Income"],
+            ["EXPENSE", "Expense"],
+          ].map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => {
+                setType(val);
+                setPage(1);
+              }}
+              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${type === val ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {pagination && !loading && (
+          <p className="text-xs text-gray-400 ml-auto">
+            {pagination.total} entries
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Sk className="h-6 w-16 rounded-full" />
+                <div className="flex-1 space-y-1.5">
+                  <Sk className="h-3.5 w-1/3" />
+                  <Sk className="h-3 w-1/4" />
+                </div>
+                <Sk className="h-4 w-24" />
+                {isAdmin && <Sk className="h-7 w-7 rounded-lg" />}
+              </div>
+            ))}
+          </div>
+        ) : funds.length === 0 ? (
+          <Empty
+            icon={IC.fund}
+            title="No fund entries"
+            subtitle={
+              type
+                ? `No ${type.toLowerCase()} entries found`
+                : "No entries recorded yet"
+            }
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  {[
+                    "Date",
+                    "Type",
+                    "Category",
+                    "Description",
+                    "Amount",
+                    ...(isAdmin ? [""] : []),
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {funds.map((fund) => (
+                  <tr
+                    key={fund._id}
+                    className="hover:bg-gray-50/50 transition-colors"
+                  >
+                    <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
+                      {new Date(fund.date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatusBadge status={fund.type} />
+                    </td>
+                    <td className="px-4 py-3.5 text-sm text-gray-700">
+                      {fund.category}
+                    </td>
+                    <td className="px-4 py-3.5 text-sm text-gray-600 max-w-xs">
+                      <span className="line-clamp-1">{fund.description}</span>
+                    </td>
+                    <td
+                      className={`px-4 py-3.5 text-sm font-semibold tabular-nums ${fund.type === "INCOME" ? "text-primary-600" : "text-danger-600"}`}
+                    >
+                      {fund.type === "INCOME" ? "+" : "−"}₹
+                      {fund.amount.toLocaleString("en-IN")}
+                    </td>
+                    {isAdmin && (
+                      <td className="px-4 py-3.5">
+                        <button
+                          onClick={() => {
+                            if (confirm("Delete this entry?"))
+                              deleteFund(fund._id);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-danger-600 hover:bg-danger-50 transition-colors"
+                        >
+                          <Icon d={IC.trash} className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {pagination && (
+        <Pagination page={page} pages={pagination.pages} onPage={setPage} />
+      )}
+
+      {!user && (
+        <p className="text-center text-xs text-gray-400 mt-8">
+          Data is maintained by federation administrators. For queries, contact
+          your local federation office.
+        </p>
+      )}
+
+      {showModal && <CreateFundModal onClose={() => setShowModal(false)} />}
+    </div>
+  );
+}

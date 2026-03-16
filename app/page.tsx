@@ -1,56 +1,71 @@
-import Hero from "@/components/home/Hero";
-import Features from "@/components/home/Features";
-import PublicNotices from "@/components/home/PublicNotices";
-import Link from "next/link";
+"use client";
+import { useEffect, useState } from "react";
+import Navbar from "@/components/layout/Navbar";
+import { useUser } from "@/hooks/useUser";
+import apiClient from "@/lib/axios/apiClient";
+import { Shop, Notice } from "@/types";
+import HomeHero from "@/components/home/HomeHero";
+import HomeStatsBar from "@/components/home/HomeStatsBar";
+import LoggedInBanner from "@/components/home/LoggedInBanner";
+import {
+  NoticesSection,
+  ShopsSection,
+  VerifyCTA,
+  HomeFeatures,
+  HowItWorks,
+  CTABanner,
+  HomeFooter,
+} from "@/components/home/HomeSections";
 
-export default function Home() {
+export default function HomePage() {
+  const { user, loading: userLoading } = useUser();
+  const [shops, setShops] = useState<Shop[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [stats, setStats] = useState({
+    totalShops: 0,
+    activeShops: 0,
+    totalNotices: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      apiClient.get("/shop/get", { params: { status: "ACTIVE", limit: 6 } }),
+      apiClient.get("/notice/get", {
+        params: { limit: 4, visibility: "PUBLIC" },
+      }),
+    ])
+      .then(([shopsRes, noticesRes]) => {
+        setShops(shopsRes.data.data || []);
+        setNotices(noticesRes.data.data || []);
+        setStats({
+          totalShops: shopsRes.data.pagination?.total || 0,
+          activeShops:
+            shopsRes.data.data?.filter(
+              (s: Shop) => s.certificateStatus === "ACTIVE",
+            ).length || 0,
+          totalNotices: noticesRes.data.pagination?.total || 0,
+        });
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <div className="min-h-screen">
-      <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="text-xl font-bold text-primary-700">
-              Traders Federation
-            </div>
-            <div className="flex gap-4">
-              <Link
-                href="/directory"
-                className="text-gray-700 hover:text-primary-600 px-3 py-2"
-              >
-                Directory
-              </Link>
-              <Link
-                href="/verify"
-                className="text-gray-700 hover:text-primary-600 px-3 py-2"
-              >
-                Verify Certificate
-              </Link>
-              <Link
-                href="/notices"
-                className="text-gray-700 hover:text-primary-600 px-3 py-2"
-              >
-                Notices
-              </Link>
-              <Link
-                href="/login"
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <Hero />
-      <Features />
-      <PublicNotices />
-
-      <footer className="bg-gray-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>© 2026 Traders Federation. All rights reserved.</p>
-        </div>
-      </footer>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      {!userLoading && user && <LoggedInBanner user={user} />}
+      {!user && <HomeHero />}
+      <HomeStatsBar stats={stats} loading={loading} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-14">
+        <NoticesSection notices={notices} loading={loading} />
+        <ShopsSection shops={shops} loading={loading} />
+        <VerifyCTA />
+      </div>
+      <HomeFeatures />
+      <HowItWorks />
+      {!userLoading && !user && <CTABanner />}
+      <HomeFooter />
     </div>
   );
 }

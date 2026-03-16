@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import apiClient from "@/lib/axios/apiClient";
 import { Fund, Pagination } from "@/types";
+import { showToast } from "@/lib/toast";
 
 interface UseFundsParams {
   page?: number;
@@ -23,6 +24,7 @@ export function useFunds(params: UseFundsParams = {}) {
       setPagination(response.data.pagination);
     } catch (error) {
       console.error("Failed to fetch funds:", error);
+      showToast.error("Failed to load funds");
     } finally {
       setLoading(false);
     }
@@ -46,13 +48,25 @@ export function useFunds(params: UseFundsParams = {}) {
     description: string;
     date: string;
   }) => {
-    await apiClient.post("/fund/create", data);
-    fetchFunds();
+    try {
+      await apiClient.post("/fund/create", data);
+      showToast.success("Fund entry created successfully!");
+      fetchFunds();
+    } catch (error) {
+      showToast.error("Failed to create fund entry");
+      throw error;
+    }
   };
 
   const deleteFund = async (id: string) => {
-    await apiClient.delete("/fund/delete", { data: { id } });
-    fetchFunds();
+    try {
+      await apiClient.delete("/fund/delete", { data: { id } });
+      showToast.success("Fund entry deleted successfully!");
+      fetchFunds();
+    } catch (error) {
+      showToast.error("Failed to delete fund entry");
+      throw error;
+    }
   };
 
   return {

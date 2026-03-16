@@ -1,114 +1,126 @@
 "use client";
-import { useDashboard } from "@/hooks/useDashboard";
-import { useUser } from "@/hooks/useUser";
+import { useEffect, useState } from "react";
+import apiClient from "@/lib/axios/apiClient";
+import { Icon, IC, Sk } from "@/components/ui";
+
+interface Stats {
+  totalShops: number;
+  activeShops: number;
+  pendingShops: number;
+  expiredShops: number;
+  totalNotices: number;
+  urgentNotices: number;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+}
+
+const cards = (s: Stats) => [
+  {
+    label: "Total Shops",
+    value: s.totalShops,
+    icon: IC.building,
+    color: "text-primary-600",
+    bg: "bg-primary-50",
+  },
+  {
+    label: "Active",
+    value: s.activeShops,
+    icon: IC.check,
+    color: "text-primary-600",
+    bg: "bg-primary-50",
+  },
+  {
+    label: "Pending Approval",
+    value: s.pendingShops,
+    icon: IC.clock,
+    color: "text-warning-600",
+    bg: "bg-warning-50",
+  },
+  {
+    label: "Expired",
+    value: s.expiredShops,
+    icon: IC.alert,
+    color: "text-danger-600",
+    bg: "bg-danger-50",
+  },
+  {
+    label: "Total Notices",
+    value: s.totalNotices,
+    icon: IC.notice,
+    color: "text-secondary-600",
+    bg: "bg-secondary-50",
+  },
+  {
+    label: "Urgent Notices",
+    value: s.urgentNotices,
+    icon: IC.alert,
+    color: "text-danger-600",
+    bg: "bg-danger-50",
+  },
+  {
+    label: "Total Income",
+    value: `₹${s.totalIncome.toLocaleString()}`,
+    icon: IC.fund,
+    color: "text-primary-600",
+    bg: "bg-primary-50",
+  },
+  {
+    label: "Balance",
+    value: `₹${s.balance.toLocaleString()}`,
+    icon: IC.fund,
+    color: s.balance >= 0 ? "text-primary-600" : "text-danger-600",
+    bg: s.balance >= 0 ? "bg-primary-50" : "bg-danger-50",
+  },
+];
 
 export default function DashboardStats() {
-  const { stats, loading } = useDashboard();
-  const { user } = useUser();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient
+      .get("/stats/dashboard")
+      .then((r) => setStats(r.data.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading) {
-    return <div className="text-center py-12">Loading...</div>;
-  }
-
-  if (!stats) return null;
-
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
-
-  if (!isAdmin) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome, {user?.name}
-        </h1>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">
-            Check your shop status in My Shop section
-          </p>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl border border-gray-100 p-5"
+          >
+            <Sk className="h-8 w-8 rounded-lg mb-3" />
+            <Sk className="h-3 w-20 mb-2" />
+            <Sk className="h-6 w-16" />
+          </div>
+        ))}
       </div>
     );
   }
 
+  if (!stats) return null;
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Total Shops</h3>
-          <p className="text-3xl font-bold text-primary-600 mt-2">
-            {stats.shops.total}
-          </p>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {cards(stats).map((c, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-sm transition-shadow"
+        >
+          <div
+            className={`w-9 h-9 ${c.bg} ${c.color} rounded-lg flex items-center justify-center mb-3`}
+          >
+            <Icon d={c.icon} className="w-4.5 h-4.5" />
+          </div>
+          <p className="text-xs text-gray-500 mb-1">{c.label}</p>
+          <p className={`text-xl font-bold ${c.color}`}>{c.value}</p>
         </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Pending</h3>
-          <p className="text-3xl font-bold text-accent-500 mt-2">
-            {stats.shops.pending}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Active</h3>
-          <p className="text-3xl font-bold text-green-600 mt-2">
-            {stats.shops.active}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Rejected</h3>
-          <p className="text-3xl font-bold text-red-600 mt-2">
-            {stats.shops.rejected}
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-primary-50 border-l-4 border-primary-600 p-4 rounded">
-        <p className="text-sm text-primary-800">
-          💡 <strong>Quick Tip:</strong> Check the{" "}
-          <a href="/certificates" className="underline font-medium">
-            Certificates page
-          </a>{" "}
-          to view expiring certificates and renew them.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Total Income</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">
-            ₹{stats.funds.income.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Total Expense</h3>
-          <p className="text-2xl font-bold text-red-600 mt-2">
-            ₹{stats.funds.expense.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Balance</h3>
-          <p className="text-2xl font-bold text-primary-600 mt-2">
-            ₹{stats.funds.balance.toLocaleString()}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Total Users</h3>
-          <p className="text-2xl font-bold text-gray-900 mt-2">{stats.users}</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-600">Total Notices</h3>
-          <p className="text-2xl font-bold text-gray-900 mt-2">
-            {stats.notices}
-          </p>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import apiClient from "@/lib/axios/apiClient";
 import { Shop, Pagination } from "@/types";
+import { showToast } from "@/lib/toast";
 
 interface UseShopsParams {
   page?: number;
@@ -24,6 +25,7 @@ export function useShops(params: UseShopsParams = {}) {
       setPagination(response.data.pagination);
     } catch (error) {
       console.error("Failed to fetch shops:", error);
+      showToast.error("Failed to load shops");
     } finally {
       setLoading(false);
     }
@@ -42,18 +44,36 @@ export function useShops(params: UseShopsParams = {}) {
   }, [fetchShops]);
 
   const approveShop = async (id: string) => {
-    await apiClient.post("/certificate/approve", { id });
-    fetchShops();
+    try {
+      await apiClient.post("/certificate/approve", { id });
+      showToast.success("Shop approved successfully!");
+      fetchShops();
+    } catch (error) {
+      showToast.error("Failed to approve shop");
+      throw error;
+    }
   };
 
   const rejectShop = async (id: string) => {
-    await apiClient.post("/certificate/reject", { id });
-    fetchShops();
+    try {
+      await apiClient.post("/certificate/reject", { id });
+      showToast.success("Shop rejected successfully!");
+      fetchShops();
+    } catch (error) {
+      showToast.error("Failed to reject shop");
+      throw error;
+    }
   };
 
   const deleteShop = async (id: string) => {
-    await apiClient.delete("/shop/delete", { data: { id } });
-    fetchShops();
+    try {
+      await apiClient.delete("/shop/delete", { data: { id } });
+      showToast.success("Shop deleted successfully!");
+      fetchShops();
+    } catch (error) {
+      showToast.error("Failed to delete shop");
+      throw error;
+    }
   };
 
   return {

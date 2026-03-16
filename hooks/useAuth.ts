@@ -1,6 +1,8 @@
+"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/axios/apiClient";
+import { showToast } from "@/lib/toast";
 
 interface LoginData {
   email: string;
@@ -29,11 +31,22 @@ export function useAuth() {
     setLoading(true);
     try {
       await apiClient.post("/auth/login", data);
+      showToast.success("Login successful!");
       router.push("/dashboard");
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      const errorMsg = axiosError?.response?.data?.message || "Login failed";
-      setError(typeof errorMsg === "string" ? errorMsg : "Login failed");
+    } catch (err) {
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as {
+          response?: { data?: { message?: string } };
+        };
+        const errorMsg = axiosError?.response?.data?.message || "Login failed";
+        setError(typeof errorMsg === "string" ? errorMsg : "Login failed");
+        showToast.error(
+          typeof errorMsg === "string" ? errorMsg : "Login failed",
+        );
+      } else {
+        setError("Login failed");
+        showToast.error("Login failed");
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -45,12 +58,25 @@ export function useAuth() {
     setLoading(true);
     try {
       await apiClient.post("/auth/register", data);
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      const errorMsg =
-        axiosError?.response?.data?.message || "Registration failed";
-      setError(typeof errorMsg === "string" ? errorMsg : "Registration failed");
+      showToast.success("Registration successful! Please login.");
+      router.push("/login");
+    } catch (err) {
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as {
+          response?: { data?: { message?: string } };
+        };
+        const errorMsg =
+          axiosError?.response?.data?.message || "Registration failed";
+        setError(
+          typeof errorMsg === "string" ? errorMsg : "Registration failed",
+        );
+        showToast.error(
+          typeof errorMsg === "string" ? errorMsg : "Registration failed",
+        );
+      } else {
+        setError("Registration failed");
+        showToast.error("Registration failed");
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -60,9 +86,11 @@ export function useAuth() {
   const logout = async () => {
     try {
       await apiClient.post("/auth/logout");
+      showToast.success("Logged out successfully");
       router.push("/login");
     } catch (err) {
       console.error("Logout failed:", err);
+      showToast.error("Logout failed");
     }
   };
 

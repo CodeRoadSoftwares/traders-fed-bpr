@@ -10,6 +10,7 @@ const publicPaths = [
   "/api/districts",
   "/api/certificate/verify",
   "/api/notice/get",
+  "/api/fund/get",
   "/api/cron",
 ];
 
@@ -22,7 +23,10 @@ const adminPaths = [
   "/api/notice/create",
   "/api/notice/update",
   "/api/notice/delete",
-  "/api/fund",
+  "/api/fund/create",
+  "/api/fund/update",
+  "/api/fund/delete",
+  "/api/fund/report",
   "/api/stats",
   "/api/shop/delete",
 ];

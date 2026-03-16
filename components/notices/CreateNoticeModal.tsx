@@ -1,14 +1,15 @@
 "use client";
 import { useState } from "react";
 import { useNotices } from "@/hooks/useNotices";
+import { Modal, Field, inputCls, Btn, Icon, IC } from "@/components/ui";
 
-interface CreateNoticeModalProps {
+export default function CreateNoticeModal({
+  onClose,
+}: {
   onClose: () => void;
-}
-
-export default function CreateNoticeModal({ onClose }: CreateNoticeModalProps) {
+}) {
   const { createNotice } = useNotices();
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     title: "",
     message: "",
     visibility: "PUBLIC",
@@ -16,104 +17,80 @@ export default function CreateNoticeModal({ onClose }: CreateNoticeModalProps) {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await createNotice(formData);
+      await createNotice(form);
       onClose();
-    } catch (error) {
-      console.error("Failed to create notice:", error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Notice</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal title="Create Notice" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Title">
+          <input
+            type="text"
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className={inputCls}
+            placeholder="Notice title"
+          />
+        </Field>
+        <Field label="Message">
+          <textarea
+            required
+            rows={4}
+            value={form.message}
+            onChange={(e) => setForm({ ...form, message: e.target.value })}
+            className={inputCls}
+            placeholder="Write the notice content..."
+          />
+        </Field>
+        <Field label="Visibility">
+          <select
+            value={form.visibility}
+            onChange={(e) => setForm({ ...form, visibility: e.target.value })}
+            className={inputCls}
+          >
+            <option value="PUBLIC">Public — visible to everyone</option>
+            <option value="SHOPS">
+              Shops Only — visible to registered members
+            </option>
+          </select>
+        </Field>
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+          <input
+            type="checkbox"
+            checked={form.urgent}
+            onChange={(e) => setForm({ ...form, urgent: e.target.checked })}
+            className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
+            <p className="text-sm font-medium text-gray-700">Mark as Urgent</p>
+            <p className="text-xs text-gray-400">
+              Sends an email notification to all users
+            </p>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message
-            </label>
-            <textarea
-              required
-              rows={4}
-              value={formData.message}
-              onChange={(e) =>
-                setFormData({ ...formData, message: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Visibility
-            </label>
-            <select
-              value={formData.visibility}
-              onChange={(e) =>
-                setFormData({ ...formData, visibility: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            >
-              <option value="PUBLIC">Public</option>
-              <option value="SHOPS">Shops Only</option>
-            </select>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="urgent"
-              checked={formData.urgent}
-              onChange={(e) =>
-                setFormData({ ...formData, urgent: e.target.checked })
-              }
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label htmlFor="urgent" className="ml-2 text-sm text-gray-700">
-              Mark as urgent (sends email to all users)
-            </label>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          {form.urgent && (
+            <Icon d={IC.alert} className="w-4 h-4 text-danger-500 ml-auto" />
+          )}
+        </label>
+        <div className="flex gap-3 pt-2">
+          <Btn variant="secondary" onClick={onClose} className="flex-1">
+            Cancel
+          </Btn>
+          <Btn type="submit" disabled={loading} className="flex-1">
+            {loading ? "Creating..." : "Create Notice"}
+          </Btn>
+        </div>
+      </form>
+    </Modal>
   );
 }

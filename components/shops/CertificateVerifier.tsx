@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useCertificates } from "@/hooks/useCertificates";
+import { Icon, IC, Btn, inputCls } from "@/components/ui";
 
-interface VerificationResult {
+interface VerifyResult {
   valid: boolean;
   error?: string;
   shop?: {
@@ -16,20 +17,18 @@ interface VerificationResult {
 }
 
 export default function CertificateVerifier() {
-  const [certificateNumber, setCertificateNumber] = useState("");
-  const [result, setResult] = useState<VerificationResult | null>(null);
+  const [cert, setCert] = useState("");
+  const [result, setResult] = useState<VerifyResult | null>(null);
   const [loading, setLoading] = useState(false);
   const { verifyCertificate } = useCertificates();
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!certificateNumber.trim()) return;
-
+    if (!cert.trim()) return;
     setLoading(true);
     setResult(null);
     try {
-      const data = await verifyCertificate(certificateNumber);
-      setResult(data);
+      setResult(await verifyCertificate(cert));
     } catch {
       setResult({ valid: false, error: "Certificate not found" });
     } finally {
@@ -38,84 +37,89 @@ export default function CertificateVerifier() {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Verify Certificate</h2>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <form onSubmit={handleVerify} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Certificate Number
-            </label>
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
+          Tools
+        </p>
+        <h2 className="text-xl font-bold text-gray-900">Verify Certificate</h2>
+      </div>
+      <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <form onSubmit={handleVerify} className="flex gap-3 mb-4">
+          <div className="relative flex-1">
+            <Icon
+              d={IC.shield}
+              className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+            />
             <input
               type="text"
-              value={certificateNumber}
-              onChange={(e) => setCertificateNumber(e.target.value)}
+              value={cert}
+              onChange={(e) => setCert(e.target.value)}
               placeholder="Enter certificate number"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              className={`${inputCls} pl-9`}
               required
             />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify Certificate"}
-          </button>
+          <Btn type="submit" disabled={loading}>
+            {loading ? "Checking..." : "Verify"}
+          </Btn>
         </form>
 
         {result && (
-          <div className="mt-6 p-4 rounded-lg border-2">
+          <div
+            className={`rounded-xl border-2 p-5 ${result.valid ? "border-primary-200 bg-primary-50/40" : "border-danger-200 bg-danger-50/40"}`}
+          >
             {result.valid && result.shop ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">✓</span>
-                  <h3 className="text-xl font-bold text-green-700">
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                    <Icon d={IC.check2} className="w-4 h-4" />
+                  </div>
+                  <p className="font-semibold text-primary-700">
                     Valid Certificate
-                  </h3>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <span className="font-medium">Shop Name:</span>{" "}
-                    {result.shop.name}
-                  </p>
-                  <p>
-                    <span className="font-medium">Category:</span>{" "}
-                    {result.shop.category}
-                  </p>
-                  <p>
-                    <span className="font-medium">Certificate Number:</span>{" "}
-                    {result.shop.certificateNumber}
-                  </p>
-                  <p>
-                    <span className="font-medium">Issued At:</span>{" "}
-                    {new Date(result.shop.issuedAt).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <span className="font-medium">Expiry Date:</span>{" "}
-                    {new Date(result.shop.expiryDate).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <span className="font-medium">Status:</span>{" "}
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                      {result.shop.status}
-                    </span>
                   </p>
                 </div>
-              </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {[
+                    ["Shop Name", result.shop.name],
+                    ["Category", result.shop.category.replace(/_/g, " ")],
+                    ["Certificate No.", result.shop.certificateNumber],
+                    ["Status", result.shop.status],
+                    [
+                      "Issued On",
+                      new Date(result.shop.issuedAt).toLocaleDateString(
+                        "en-IN",
+                      ),
+                    ],
+                    [
+                      "Valid Until",
+                      new Date(result.shop.expiryDate).toLocaleDateString(
+                        "en-IN",
+                      ),
+                    ],
+                  ].map(([l, v]) => (
+                    <div key={l}>
+                      <p className="text-xs text-gray-400 mb-0.5">{l}</p>
+                      <p className="font-medium text-gray-900 capitalize">
+                        {v}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">✗</span>
-                  <h3 className="text-xl font-bold text-red-700">
-                    Invalid Certificate
-                  </h3>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-danger-100 text-danger-600 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon d={IC.x} className="w-4 h-4" />
                 </div>
-                <p className="text-sm text-gray-600">
-                  {result.error ||
-                    "This certificate is not valid or has expired"}
-                </p>
+                <div>
+                  <p className="font-semibold text-danger-700">
+                    Invalid Certificate
+                  </p>
+                  <p className="text-sm text-danger-600 mt-0.5">
+                    {result.error || "Not found or expired"}
+                  </p>
+                </div>
               </div>
             )}
           </div>

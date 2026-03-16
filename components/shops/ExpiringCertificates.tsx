@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useCertificates } from "@/hooks/useCertificates";
+import { Icon, IC, Sk, Empty } from "@/components/ui";
 
 export default function ExpiringCertificates() {
   const [days, setDays] = useState(30);
@@ -15,28 +16,31 @@ export default function ExpiringCertificates() {
     fetchExpiringCertificates(days);
   }, [days, fetchExpiringCertificates]);
 
-  const handleRenew = async (shopId: string, shopName: string) => {
-    if (confirm(`Renew certificate for ${shopName}?`)) {
-      try {
-        await renewCertificate(shopId);
-        alert("Certificate renewed successfully");
-        fetchExpiringCertificates(days);
-      } catch (error) {
-        alert("Failed to renew certificate");
-      }
+  const handleRenew = async (id: string, name: string) => {
+    if (!confirm(`Renew certificate for ${name}?`)) return;
+    try {
+      await renewCertificate(id);
+      fetchExpiringCertificates(days);
+    } catch {
+      alert("Failed to renew");
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Expiring Certificates
-        </h2>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
+            Alerts
+          </p>
+          <h2 className="text-xl font-bold text-gray-900">
+            Expiring Certificates
+          </h2>
+        </div>
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+          className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700"
         >
           <option value={15}>Next 15 days</option>
           <option value={30}>Next 30 days</option>
@@ -45,86 +49,122 @@ export default function ExpiringCertificates() {
         </select>
       </div>
 
-      {loading ? (
-        <div className="text-center py-8">Loading...</div>
-      ) : expiringShops.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-          No certificates expiring in the next {days} days
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Shop Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Certificate Number
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Expiry Date
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Days Left
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {expiringShops.map((shop) => {
-                const daysLeft = shop.certificateExpiryDate
-                  ? Math.ceil(
-                      (new Date(shop.certificateExpiryDate).getTime() -
-                        new Date().getTime()) /
-                        (1000 * 60 * 60 * 24),
-                    )
-                  : 0;
-                return (
-                  <tr key={shop._id}>
-                    <td className="px-4 py-3 text-sm">{shop.user?.name}</td>
-                    <td className="px-4 py-3 text-sm">
-                      {shop.certificateNumber}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {shop.certificateExpiryDate
-                        ? new Date(
-                            shop.certificateExpiryDate,
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          daysLeft <= 7
-                            ? "bg-red-100 text-red-700"
-                            : daysLeft <= 15
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {daysLeft} days
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() =>
-                          handleRenew(shop._id, shop.user?.name || "")
-                        }
-                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                      >
-                        Renew
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Sk className="h-9 w-9 rounded-lg" />
+                <div className="flex-1 space-y-1.5">
+                  <Sk className="h-3.5 w-1/3" />
+                  <Sk className="h-3 w-1/4" />
+                </div>
+                <Sk className="h-5 w-16 rounded-full" />
+                <Sk className="h-8 w-16 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        ) : expiringShops.length === 0 ? (
+          <Empty
+            icon={IC.check}
+            title={`No certificates expiring in the next ${days} days`}
+            subtitle="All certificates are in good standing"
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  {[
+                    "Shop",
+                    "Certificate No.",
+                    "Expiry Date",
+                    "Days Left",
+                    "Action",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {expiringShops.map((shop) => {
+                  const d = shop.certificateExpiryDate
+                    ? Math.ceil(
+                        (new Date(shop.certificateExpiryDate).getTime() -
+                          Date.now()) /
+                          86400000,
+                      )
+                    : 0;
+                  const urgency =
+                    d <= 7
+                      ? "bg-danger-50 text-danger-700 border-danger-100"
+                      : d <= 15
+                        ? "bg-warning-50 text-warning-700 border-warning-100"
+                        : "bg-gray-100 text-gray-600 border-gray-200";
+                  return (
+                    <tr
+                      key={shop._id}
+                      className="hover:bg-gray-50/50 transition-colors"
+                    >
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-warning-50 text-warning-600 rounded-lg flex items-center justify-center text-xs font-bold shrink-0">
+                            {shop.user?.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {shop.user?.name}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {shop.user?.address?.district}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-xs font-mono text-gray-500">
+                        {shop.certificateNumber}
+                      </td>
+                      <td className="px-4 py-3.5 text-sm text-gray-600">
+                        {shop.certificateExpiryDate
+                          ? new Date(
+                              shop.certificateExpiryDate,
+                            ).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${urgency}`}
+                        >
+                          {d} day{d !== 1 ? "s" : ""}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <button
+                          onClick={() =>
+                            handleRenew(shop._id, shop.user?.name || "")
+                          }
+                          className="inline-flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 font-medium"
+                        >
+                          <Icon d={IC.refresh} className="w-3.5 h-3.5" /> Renew
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

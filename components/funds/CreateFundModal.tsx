@@ -1,14 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useFunds } from "@/hooks/useFunds";
+import { Modal, Field, inputCls, Btn } from "@/components/ui";
 
-interface CreateFundModalProps {
-  onClose: () => void;
-}
-
-export default function CreateFundModal({ onClose }: CreateFundModalProps) {
+export default function CreateFundModal({ onClose }: { onClose: () => void }) {
   const { createFund } = useFunds();
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     type: "INCOME",
     category: "",
     amount: "",
@@ -17,119 +14,89 @@ export default function CreateFundModal({ onClose }: CreateFundModalProps) {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       await createFund({
-        ...formData,
-        amount: Number(formData.amount),
-        date: new Date(formData.date).toISOString(),
+        ...form,
+        amount: Number(form.amount),
+        date: new Date(form.date).toISOString(),
       });
       onClose();
-    } catch (error) {
-      console.error("Failed to create fund:", error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Add Fund Entry
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Type
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            >
-              <option value="INCOME">Income</option>
-              <option value="EXPENSE">Expense</option>
-            </select>
+    <Modal title="Add Fund Entry" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Type">
+          <div className="grid grid-cols-2 gap-2">
+            {["INCOME", "EXPENSE"].map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setForm({ ...form, type: t })}
+                className={`py-2.5 rounded-lg text-sm font-medium border transition-colors ${form.type === t ? (t === "INCOME" ? "bg-primary-600 text-white border-primary-600" : "bg-danger-600 text-white border-danger-600") : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"}`}
+              >
+                {t === "INCOME" ? "Income" : "Expense"}
+              </button>
+            ))}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount
-            </label>
-            <input
-              type="number"
-              required
-              value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              required
-              rows={3}
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date
-            </label>
-            <input
-              type="date"
-              required
-              value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </Field>
+        <Field label="Category">
+          <input
+            type="text"
+            required
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className={inputCls}
+            placeholder="e.g. Registration Fee, Office Supplies"
+          />
+        </Field>
+        <Field label="Amount (₹)">
+          <input
+            type="number"
+            required
+            min="1"
+            value={form.amount}
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            className={inputCls}
+            placeholder="0"
+          />
+        </Field>
+        <Field label="Description">
+          <textarea
+            required
+            rows={3}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className={inputCls}
+            placeholder="Brief description of this entry"
+          />
+        </Field>
+        <Field label="Date">
+          <input
+            type="date"
+            required
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            className={inputCls}
+          />
+        </Field>
+        <div className="flex gap-3 pt-2">
+          <Btn variant="secondary" onClick={onClose} className="flex-1">
+            Cancel
+          </Btn>
+          <Btn type="submit" disabled={loading} className="flex-1">
+            {loading ? "Saving..." : "Save Entry"}
+          </Btn>
+        </div>
+      </form>
+    </Modal>
   );
 }

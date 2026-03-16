@@ -1,191 +1,230 @@
 "use client";
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import apiClient from "@/lib/axios/apiClient";
 import { JKDistrict } from "@/constants/districts";
+import { Icon, IC } from "@/components/ui";
 
 export default function RegisterForm() {
-  const { register, loading, error } = useAuth();
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
-    address: {
-      line1: "",
-      district: "",
-      pincode: "",
-    },
+    address: { line: "", district: "", pincode: "" },
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [step, setStep] = useState(1);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      ...formData,
-      phone: Number(formData.phone),
-      address: {
-        ...formData.address,
-        pincode: Number(formData.address.pincode),
-      },
-    };
-    await register(payload);
+    setLoading(true);
+    setError("");
+    try {
+      await apiClient.post("/auth/register", form);
+      router.push("/login");
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      setError(ax?.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const inputCls =
+    "w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all";
+  const labelCls = "block text-sm font-medium text-gray-700 mb-1.5";
+
   return (
-    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8">
+    <div className="w-full max-w-md">
+      {/* Logo */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary-700">
-          Traders Federation
-        </h1>
-        <p className="text-gray-600 mt-2">Create your shop account</p>
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg mb-4">
+          <span className="text-white font-bold text-lg">TF</span>
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
+        <p className="text-gray-500 text-sm mt-1">
+          Join the Traders Federation
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone
-            </label>
-            <input
-              type="tel"
-              required
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Address</h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address Line
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.address.line1}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  address: { ...formData.address, line1: e.target.value },
-                })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                District
-              </label>
-              <select
-                required
-                value={formData.address.district}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: { ...formData.address, district: e.target.value },
-                  })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              >
-                <option value="">Select District</option>
-                {Object.values(JKDistrict).map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
+      {/* Step indicator */}
+      <div className="flex items-center gap-2 mb-6">
+        {[1, 2].map((s) => (
+          <div key={s} className="flex items-center gap-2 flex-1">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${step >= s ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-400"}`}
+            >
+              {s}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pincode
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.address.pincode}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: { ...formData.address, pincode: e.target.value },
-                  })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            <p
+              className={`text-xs font-medium ${step >= s ? "text-gray-700" : "text-gray-400"}`}
+            >
+              {s === 1 ? "Account" : "Address"}
+            </p>
+            {s < 2 && (
+              <div
+                className={`flex-1 h-px ${step > s ? "bg-primary-300" : "bg-gray-200"}`}
               />
-            </div>
+            )}
           </div>
-        </div>
+        ))}
+      </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Creating account..." : "Register"}
-        </button>
-      </form>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="flex items-center gap-2 px-3.5 py-3 bg-danger-50 border border-danger-100 rounded-lg text-danger-700 text-sm">
+              <Icon d={IC.alert} className="w-4 h-4 shrink-0" /> {error}
+            </div>
+          )}
 
-      <div className="mt-6 text-center">
-        <p className="text-gray-600 text-sm">
+          {step === 1 && (
+            <>
+              <div>
+                <label className={labelCls}>Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className={inputCls}
+                  placeholder="Your full name"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className={inputCls}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className={inputCls}
+                  placeholder="10-digit mobile number"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Password</label>
+                <input
+                  type="password"
+                  required
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  className={inputCls}
+                  placeholder="Choose a strong password"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (form.name && form.email && form.phone && form.password)
+                    setStep(2);
+                }}
+                className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                Continue <Icon d={IC.chevronRight} className="w-4 h-4" />
+              </button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div>
+                <label className={labelCls}>Street Address</label>
+                <input
+                  type="text"
+                  required
+                  value={form.address.line}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      address: { ...form.address, line: e.target.value },
+                    })
+                  }
+                  className={inputCls}
+                  placeholder="Street, locality"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>District</label>
+                <select
+                  required
+                  value={form.address.district}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      address: { ...form.address, district: e.target.value },
+                    })
+                  }
+                  className={inputCls}
+                >
+                  <option value="">Select district</option>
+                  {Object.values(JKDistrict).map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Pincode</label>
+                <input
+                  type="text"
+                  required
+                  value={form.address.pincode}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      address: { ...form.address, pincode: e.target.value },
+                    })
+                  }
+                  className={inputCls}
+                  placeholder="6-digit pincode"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Icon d={IC.chevronLeft} className="w-4 h-4" /> Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{" "}
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+        <p className="text-center text-sm text-gray-500 mt-5">
           Already have an account?{" "}
           <Link
             href="/login"
@@ -194,6 +233,15 @@ export default function RegisterForm() {
             Sign in
           </Link>
         </p>
+      </div>
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <Icon d={IC.arrowLeft} className="w-3.5 h-3.5" /> Back to home
+        </Link>
       </div>
     </div>
   );

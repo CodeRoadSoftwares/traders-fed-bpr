@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import apiClient from "@/lib/axios/apiClient";
 import { Notice, Pagination } from "@/types";
+import { showToast } from "@/lib/toast";
 
 interface UseNoticesParams {
   page?: number;
@@ -23,6 +24,7 @@ export function useNotices(params: UseNoticesParams = {}) {
       setPagination(response.data.pagination);
     } catch (error) {
       console.error("Failed to fetch notices:", error);
+      showToast.error("Failed to load notices");
     } finally {
       setLoading(false);
     }
@@ -45,13 +47,25 @@ export function useNotices(params: UseNoticesParams = {}) {
     visibility: string;
     urgent: boolean;
   }) => {
-    await apiClient.post("/notice/create", data);
-    fetchNotices();
+    try {
+      await apiClient.post("/notice/create", data);
+      showToast.success("Notice created successfully!");
+      fetchNotices();
+    } catch (error) {
+      showToast.error("Failed to create notice");
+      throw error;
+    }
   };
 
   const deleteNotice = async (id: string) => {
-    await apiClient.delete("/notice/delete", { data: { id } });
-    fetchNotices();
+    try {
+      await apiClient.delete("/notice/delete", { data: { id } });
+      showToast.success("Notice deleted successfully!");
+      fetchNotices();
+    } catch (error) {
+      showToast.error("Failed to delete notice");
+      throw error;
+    }
   };
 
   return {

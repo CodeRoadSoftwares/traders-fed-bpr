@@ -1,10 +1,11 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import FundsList from "@/components/funds/FundsList";
+import Navbar from "@/components/layout/Navbar";
+import FundsDashboard from "@/components/funds/FundsDashboard";
 
 export default function FundsPage() {
   return (
-    <DashboardLayout>
-      <FundsList />
-    </DashboardLayout>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <FundsDashboard />
+    </div>
   );
 }
