@@ -57,7 +57,7 @@ export default function HomePage() {
       {!userLoading && user && <LoggedInBanner user={user} />}
       {!user && <HomeHero />}
       <HomeStatsBar stats={stats} loading={loading} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 sm:space-y-14">
         <NoticesSection notices={notices} loading={loading} />
         <ShopsSection shops={shops} loading={loading} />
         <VerifyCTA />

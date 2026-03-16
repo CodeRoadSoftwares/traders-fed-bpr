@@ -101,11 +101,11 @@ export default function LoggedInBanner({
 
   return (
     <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-primary-200 text-sm">Welcome back</p>
-            <h2 className="text-xl font-semibold">{user.name}</h2>
+            <p className="text-primary-200 text-xs">Welcome back</p>
+            <h2 className="text-lg font-semibold">{user.name}</h2>
             <p className="text-primary-300 text-xs mt-0.5 capitalize">
               {user.role.toLowerCase().replace("_", " ")}
             </p>
@@ -115,10 +115,13 @@ export default function LoggedInBanner({
               <Link
                 key={a.href}
                 href={a.href}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${a.color}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${a.color}`}
               >
-                <Icon d={a.icon} className="w-4 h-4" />
-                {a.label}
+                <Icon
+                  d={a.icon}
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"
+                />
+                <span>{a.label}</span>
               </Link>
             ))}
           </div>

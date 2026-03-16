@@ -114,16 +114,16 @@ export default function ShopDashboard({
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold shrink-0">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold shrink-0">
           {user.name.charAt(0).toUpperCase()}
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
             Welcome, {user.name.split(" ")[0]}
           </h1>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 truncate">
             {user.email} · {user.address?.district || "Jammu & Kashmir"}
           </p>
         </div>
@@ -212,7 +212,7 @@ export default function ShopDashboard({
                 )}
 
               <div className="bg-white rounded-xl border border-gray-100 p-5">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     {
                       label: "Certificate No.",
@@ -250,12 +250,12 @@ export default function ShopDashboard({
                         : "Pending",
                     },
                   ].map((row) => (
-                    <div key={row.label}>
+                    <div key={row.label} className="min-w-0">
                       <p className="text-xs text-gray-400 mb-0.5">
                         {row.label}
                       </p>
                       <p
-                        className={`text-sm font-semibold text-gray-900 capitalize ${row.mono ? "font-mono text-xs" : ""}`}
+                        className={`text-sm font-semibold text-gray-900 capitalize truncate ${row.mono ? "font-mono text-xs" : ""}`}
                       >
                         {row.value}
                       </p>

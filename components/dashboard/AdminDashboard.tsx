@@ -114,22 +114,22 @@ export default function AdminDashboard({
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold shrink-0">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
               Good day, {user.name.split(" ")[0]}
             </h1>
-            <p className="text-xs text-gray-400 capitalize">
+            <p className="text-xs text-gray-400 capitalize truncate">
               {user.role.toLowerCase().replace("_", " ")} · {user.email}
             </p>
           </div>
         </div>
-        <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 text-xs font-medium rounded-full border border-primary-100">
+        <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 text-xs font-medium rounded-full border border-primary-100 shrink-0">
           <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse" />{" "}
           Live data
         </span>
@@ -229,16 +229,17 @@ export default function AdminDashboard({
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {shop.user?.name}
                       </p>
-                      <p className="text-xs text-gray-400 capitalize">
+                      <p className="text-xs text-gray-400 capitalize truncate">
                         {shop.category?.replace(/_/g, " ")} ·{" "}
                         {shop.user?.address?.district}
                       </p>
                     </div>
                     <Link
                       href={`/shops/${shop._id}`}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors shrink-0"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors shrink-0"
                     >
-                      Review <Icon d={IC.chevronRight} className="w-3 h-3" />
+                      <span className="hidden sm:inline">Review</span>
+                      <Icon d={IC.chevronRight} className="w-3 h-3" />
                     </Link>
                   </div>
                 ))}

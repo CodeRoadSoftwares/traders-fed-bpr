@@ -123,22 +123,24 @@ export function NoticesSection({
 }) {
   return (
     <section>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div>
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
             Announcements
           </p>
-          <h2 className="text-xl font-bold text-gray-900">Latest Notices</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+            Latest Notices
+          </h2>
         </div>
         <Link
           href="/notices"
-          className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
+          className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium shrink-0"
         >
           View all <Icon d={ICONS.arrow} className="w-4 h-4" />
         </Link>
       </div>
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
@@ -152,7 +154,7 @@ export function NoticesSection({
           ))}
         </div>
       ) : notices.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {notices.map((n) => (
             <NoticeCard key={n._id} notice={n} />
           ))}
@@ -177,16 +179,18 @@ export function ShopsSection({
 }) {
   return (
     <section>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div>
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
             Directory
           </p>
-          <h2 className="text-xl font-bold text-gray-900">Verified Shops</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+            Verified Shops
+          </h2>
         </div>
         <Link
           href="/directory"
-          className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
+          className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium shrink-0"
         >
           Browse all <Icon d={ICONS.arrow} className="w-4 h-4" />
         </Link>
@@ -224,10 +228,10 @@ export function ShopsSection({
 
 export function VerifyCTA() {
   return (
-    <section className="bg-white rounded-xl border border-gray-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center shrink-0">
-          <Icon d={ICONS.verify} className="w-6 h-6" />
+    <section className="bg-white rounded-xl border border-gray-100 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+      <div className="flex items-start sm:items-center gap-4">
+        <div className="w-11 h-11 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center shrink-0">
+          <Icon d={ICONS.verify} className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
         <div>
           <h3 className="font-semibold text-gray-900">
@@ -241,7 +245,7 @@ export function VerifyCTA() {
       </div>
       <Link
         href="/verify"
-        className="shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+        className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-md"
       >
         Verify Now <Icon d={ICONS.arrow} className="w-4 h-4" />
       </Link>
@@ -295,25 +299,25 @@ export function HomeFeatures() {
     },
   ];
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-12 sm:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-2">
             Platform Features
           </p>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             Everything the federation needs
           </h2>
-          <p className="text-gray-500 mt-2 max-w-xl">
+          <p className="text-gray-500 mt-2 max-w-xl text-sm sm:text-base">
             A single platform for shop registration, certificate management,
             public communication, and financial accountability.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {features.map((f, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl border border-gray-100 p-5 sm:p-6 hover:shadow-md transition-shadow"
             >
               <div
                 className={`w-10 h-10 ${f.bg} ${f.color} rounded-lg flex items-center justify-center mb-4`}
@@ -354,29 +358,33 @@ export function HowItWorks() {
     },
   ];
   return (
-    <section className="py-16 bg-white border-t border-gray-100">
+    <section className="py-12 sm:py-16 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-2">
             Process
           </p>
-          <h2 className="text-2xl font-bold text-gray-900">How it works</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            How it works
+          </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
           {steps.map((s, i) => (
             <div key={i} className="relative">
               {i < steps.length - 1 && (
                 <div
-                  className="hidden lg:block absolute top-5 left-full w-full h-px bg-gray-200 z-0"
-                  style={{ width: "calc(100% - 2.5rem)", left: "2.5rem" }}
+                  className="hidden lg:block absolute top-5 h-px bg-gray-200 z-0"
+                  style={{ left: "2.5rem", right: "-1rem" }}
                 />
               )}
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-full bg-primary-600 text-white text-sm font-bold flex items-center justify-center mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center mb-3 sm:mb-4">
                   {s.step}
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base">
+                  {s.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -390,12 +398,12 @@ export function HowItWorks() {
 
 export function CTABanner() {
   return (
-    <section className="py-16 bg-primary-600">
+    <section className="py-12 sm:py-16 bg-primary-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl font-bold text-white mb-3">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">
           Ready to register your shop?
         </h2>
-        <p className="text-primary-200 mb-8 max-w-xl mx-auto">
+        <p className="text-primary-200 mb-7 max-w-xl mx-auto text-sm sm:text-base">
           Join the Traders Federation and get your business officially verified.
           It only takes a few minutes to get started.
         </p>
@@ -421,11 +429,11 @@ export function CTABanner() {
 export function HomeFooter() {
   return (
     <footer className="bg-gray-900 text-gray-400">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-          <div className="md:col-span-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10">
+          <div className="col-span-2 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-sm">TF</span>
               </div>
               <span className="text-white font-semibold">
@@ -439,7 +447,7 @@ export function HomeFooter() {
             </p>
           </div>
           <div>
-            <h4 className="text-white text-sm font-semibold mb-4">
+            <h4 className="text-white text-sm font-semibold mb-3 sm:mb-4">
               Public Services
             </h4>
             <ul className="space-y-2 text-sm">
@@ -461,7 +469,7 @@ export function HomeFooter() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white text-sm font-semibold mb-4">
+            <h4 className="text-white text-sm font-semibold mb-3 sm:mb-4">
               Member Portal
             </h4>
             <ul className="space-y-2 text-sm">
@@ -482,7 +490,7 @@ export function HomeFooter() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
+        <div className="border-t border-gray-800 pt-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
           <p>
             © {new Date().getFullYear()} Traders Federation, Jammu & Kashmir.
             All rights reserved.
