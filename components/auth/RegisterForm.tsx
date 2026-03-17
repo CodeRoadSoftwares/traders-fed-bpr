@@ -5,6 +5,7 @@ import Link from "next/link";
 import apiClient from "@/lib/axios/apiClient";
 import { JKDistrict } from "@/constants/districts";
 import { Icon, IC } from "@/components/ui";
+import { showToast } from "@/lib/toast";
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
@@ -12,23 +13,29 @@ export default function RegisterForm() {
     email: "",
     password: "",
     phone: "",
-    address: { line: "", district: "", pincode: "" },
+    address: { line1: "", district: "", pincode: "" },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [step, setStep] = useState(1);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
     try {
-      await apiClient.post("/auth/register", form);
+      await apiClient.post("/auth/register", {
+        ...form,
+        phone: Number(form.phone),
+        address: {
+          ...form.address,
+          pincode: Number(form.address.pincode),
+        },
+      });
+      showToast.success("Account created! Please sign in.");
       router.push("/login");
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
-      setError(ax?.response?.data?.message || "Registration failed");
+      showToast.error(ax?.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -76,12 +83,6 @@ export default function RegisterForm() {
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="flex items-center gap-2 px-3.5 py-3 bg-danger-50 border border-danger-100 rounded-lg text-danger-700 text-sm">
-              <Icon d={IC.alert} className="w-4 h-4 shrink-0" /> {error}
-            </div>
-          )}
-
           {step === 1 && (
             <>
               <div>
@@ -150,11 +151,11 @@ export default function RegisterForm() {
                 <input
                   type="text"
                   required
-                  value={form.address.line}
+                  value={form.address.line1}
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      address: { ...form.address, line: e.target.value },
+                      address: { ...form.address, line1: e.target.value },
                     })
                   }
                   className={inputCls}

@@ -60,10 +60,14 @@ export async function POST(req: Request) {
 
     return res;
   } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: "Invalid registration data. Please check all fields." },
+        { status: 400 },
+      );
+    }
     return NextResponse.json(
-      {
-        message: error instanceof Error ? error.message : "Registration failed",
-      },
+      { message: "Registration failed" },
       { status: 500 },
     );
   }

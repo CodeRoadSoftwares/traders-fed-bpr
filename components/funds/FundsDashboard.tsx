@@ -82,12 +82,29 @@ export default function FundsDashboard() {
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortAmount, setSortAmount] = useState<"" | "asc" | "desc">("");
   const [showModal, setShowModal] = useState(false);
   const { funds, pagination, loading, deleteFund } = useFunds({
     page,
     type,
     limit: 15,
   });
+
+  const filtered = funds.filter((f) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      f.category?.toLowerCase().includes(q) ||
+      f.description?.toLowerCase().includes(q)
+    );
+  });
+
+  const sorted = sortAmount
+    ? [...filtered].sort((a, b) =>
+        sortAmount === "asc" ? a.amount - b.amount : b.amount - a.amount,
+      )
+    : filtered;
 
   const income = funds
     .filter((f) => f.type === "INCOME")
@@ -113,6 +130,36 @@ export default function FundsDashboard() {
     }
   };
 
+  const handleCsvExport = async () => {
+    try {
+      // Fetch all entries for current type filter (no pagination)
+      const r = await apiClient.get("/fund/get", {
+        params: { type: type || undefined, limit: 10000, page: 1 },
+      });
+      const all: typeof funds = r.data.data || [];
+      const rows = [
+        ["Date", "Type", "Category", "Description", "Amount"],
+        ...all.map((f) => [
+          new Date(f.date).toLocaleDateString("en-IN"),
+          f.type,
+          f.category,
+          `"${(f.description || "").replace(/"/g, '""')}"`,
+          f.amount,
+        ]),
+      ];
+      const csv = rows.map((r) => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `funds-${type || "all"}-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Failed to export CSV");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
@@ -127,16 +174,21 @@ export default function FundsDashboard() {
               : "Complete record of federation income and expenditure — updated in real time"}
           </p>
         </div>
-        {isAdmin && (
-          <div className="flex gap-2">
-            <Btn variant="secondary" onClick={handleReport}>
-              <Icon d={IC.download} className="w-4 h-4" /> PDF Report
-            </Btn>
-            <Btn onClick={() => setShowModal(true)}>
-              <Icon d={IC.plus} className="w-4 h-4" /> Add Entry
-            </Btn>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <Btn variant="secondary" onClick={handleCsvExport}>
+            <Icon d={IC.download} className="w-4 h-4" /> CSV Export
+          </Btn>
+          {isAdmin && (
+            <>
+              <Btn variant="secondary" onClick={handleReport}>
+                <Icon d={IC.download} className="w-4 h-4" /> PDF Report
+              </Btn>
+              <Btn onClick={() => setShowModal(true)}>
+                <Icon d={IC.plus} className="w-4 h-4" /> Add Entry
+              </Btn>
+            </>
+          )}
+        </div>
       </div>
 
       {!user && (
@@ -154,14 +206,31 @@ export default function FundsDashboard() {
         <SummaryCards income={income} expense={expense} loading={loading} />
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex items-center gap-3">
-        <p className="text-sm text-gray-500 shrink-0">Filter by:</p>
-        <div className="flex gap-2">
-          {[
-            ["", "All"],
-            ["INCOME", "Income"],
-            ["EXPENSE", "Expense"],
-          ].map(([val, label]) => (
+      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Search */}
+        <div className="relative flex-1 min-w-0">
+          <Icon
+            d={IC.search}
+            className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search category or description…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700 placeholder-gray-400"
+          />
+        </div>
+
+        {/* Type filter */}
+        <div className="flex gap-2 shrink-0">
+          {(
+            [
+              ["", "All"],
+              ["INCOME", "Income"],
+              ["EXPENSE", "Expense"],
+            ] as const
+          ).map(([val, label]) => (
             <button
               key={val}
               onClick={() => {
@@ -174,8 +243,21 @@ export default function FundsDashboard() {
             </button>
           ))}
         </div>
+
+        {/* Sort by amount */}
+        <select
+          value={sortAmount}
+          onChange={(e) => setSortAmount(e.target.value as "" | "asc" | "desc")}
+          className="shrink-0 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700"
+        >
+          <option value="">Sort: Date</option>
+          <option value="desc">Amount: High → Low</option>
+          <option value="asc">Amount: Low → High</option>
+        </select>
+
         {pagination && !loading && (
-          <p className="text-xs text-gray-400 ml-auto">
+          <p className="text-xs text-gray-400 shrink-0">
+            {search ? `${sorted.length} of ` : ""}
             {pagination.total} entries
           </p>
         )}
@@ -206,19 +288,18 @@ export default function FundsDashboard() {
                 : "No entries recorded yet"
             }
           />
+        ) : sorted.length === 0 ? (
+          <Empty
+            icon={IC.fund}
+            title="No results"
+            subtitle={`No entries match "${search}"`}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  {[
-                    "Date",
-                    "Type",
-                    "Category",
-                    "Description",
-                    "Amount",
-                    ...(isAdmin ? [""] : []),
-                  ].map((h) => (
+                  {["Date", "Type", "Category", "Description"].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
@@ -226,10 +307,30 @@ export default function FundsDashboard() {
                       {h}
                     </th>
                   ))}
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <button
+                      onClick={() =>
+                        setSortAmount((s) =>
+                          s === "desc" ? "asc" : s === "asc" ? "" : "desc",
+                        )
+                      }
+                      className="flex items-center gap-1 hover:text-gray-800 transition-colors"
+                    >
+                      Amount
+                      <span className="text-gray-300">
+                        {sortAmount === "desc"
+                          ? "↓"
+                          : sortAmount === "asc"
+                            ? "↑"
+                            : "↕"}
+                      </span>
+                    </button>
+                  </th>
+                  {isAdmin && <th className="px-4 py-3" />}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {funds.map((fund) => (
+                {sorted.map((fund) => (
                   <tr
                     key={fund._id}
                     className="hover:bg-gray-50/50 transition-colors"
