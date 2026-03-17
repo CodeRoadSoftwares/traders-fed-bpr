@@ -13,6 +13,7 @@ import {
   Btn,
 } from "@/components/ui";
 import apiClient from "@/lib/axios/apiClient";
+import { showToast } from "@/lib/toast";
 
 function SummaryCards({
   income,
@@ -126,7 +127,7 @@ export default function FundsDashboard() {
       a.download = "funds-report.pdf";
       a.click();
     } catch {
-      alert("Failed to generate report");
+      showToast.error("Failed to generate report");
     }
   };
 
@@ -156,7 +157,7 @@ export default function FundsDashboard() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert("Failed to export CSV");
+      showToast.error("Failed to export CSV");
     }
   };
 

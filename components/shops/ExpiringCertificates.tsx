@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCertificates } from "@/hooks/useCertificates";
 import { Icon, IC, Sk, Empty } from "@/components/ui";
+import { showToast } from "@/lib/toast";
 
 export default function ExpiringCertificates() {
   const [days, setDays] = useState(30);
@@ -22,7 +23,7 @@ export default function ExpiringCertificates() {
       await renewCertificate(id);
       fetchExpiringCertificates(days);
     } catch {
-      alert("Failed to renew");
+      showToast.error("Failed to renew");
     }
   };
 

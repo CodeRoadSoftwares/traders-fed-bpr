@@ -4,9 +4,9 @@ import Navbar from "@/components/layout/Navbar";
 import { useUser } from "@/hooks/useUser";
 import apiClient from "@/lib/axios/apiClient";
 import { Shop, Notice } from "@/types";
-import HomeHero from "@/components/home/HomeHero";
+import HomeCarousel from "@/components/home/HomeCarousel";
+import FederationMessage from "@/components/home/FederationMessage";
 import HomeStatsBar from "@/components/home/HomeStatsBar";
-import LoggedInBanner from "@/components/home/LoggedInBanner";
 import {
   NoticesSection,
   ShopsSection,
@@ -18,7 +18,7 @@ import {
 } from "@/components/home/HomeSections";
 
 export default function HomePage() {
-  const { user, loading: userLoading } = useUser();
+  const { user } = useUser();
   const [shops, setShops] = useState<Shop[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [stats, setStats] = useState({
@@ -54,17 +54,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      {!userLoading && user && <LoggedInBanner user={user} />}
-      {!user && <HomeHero />}
+      <HomeCarousel />
+      <FederationMessage />
       <HomeStatsBar stats={stats} loading={loading} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 sm:space-y-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-8 sm:space-y-14">
         <NoticesSection notices={notices} loading={loading} />
         <ShopsSection shops={shops} loading={loading} />
         <VerifyCTA />
       </div>
       <HomeFeatures />
       <HowItWorks />
-      {!userLoading && !user && <CTABanner />}
+      {!user && <CTABanner />}
       <HomeFooter />
     </div>
   );

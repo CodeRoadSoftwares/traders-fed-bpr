@@ -50,18 +50,17 @@ export default function HomeStatsBar({ stats, loading }: Props) {
   return (
     <div className="bg-white border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4">
+        {/* Scrollable row on mobile, grid on md+ */}
+        <div className="flex overflow-x-auto md:grid md:grid-cols-4 gap-0 scrollbar-hide">
           {items.map((item, i) => (
             <div
               key={i}
-              className={`py-5 px-4 sm:px-6 flex items-center gap-3 ${
-                i % 2 === 0 ? "border-r border-gray-100" : ""
-              } ${i < 2 ? "border-b md:border-b-0 border-gray-100" : ""} ${
+              className={`flex items-center gap-3 py-4 px-4 sm:px-6 shrink-0 min-w-[140px] md:min-w-0 ${
                 i < 3 ? "md:border-r md:border-gray-100" : ""
               }`}
             >
               <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gray-50 flex items-center justify-center ${item.color} shrink-0`}
+                className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${item.color} shrink-0`}
               >
                 <Icon d={item.icon} className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
@@ -69,13 +68,11 @@ export default function HomeStatsBar({ stats, loading }: Props) {
                 {loading ? (
                   <Skeleton className="h-6 w-10 mb-1" />
                 ) : (
-                  <p
-                    className={`text-xl sm:text-2xl font-bold ${item.color} tabular-nums`}
-                  >
+                  <p className={`text-xl font-bold ${item.color} tabular-nums`}>
                     {item.value.toLocaleString()}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 leading-tight truncate">
+                <p className="text-xs text-gray-500 leading-tight whitespace-nowrap">
                   {item.label}
                 </p>
               </div>

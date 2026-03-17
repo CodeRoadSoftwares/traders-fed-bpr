@@ -5,6 +5,7 @@ import { Shop } from "@/types";
 import { Icon, IC, StatusBadge, Spinner, Btn } from "@/components/ui";
 import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
+import { showToast } from "@/lib/toast";
 
 export default function ShopDetails({
   params,
@@ -37,7 +38,7 @@ export default function ShopDetails({
       await apiClient.post("/certificate/renew", { id: shop._id });
       params.then((p) => fetchShop(p.id));
     } catch {
-      alert("Failed to renew certificate");
+      showToast.error("Failed to renew certificate");
     }
   };
 

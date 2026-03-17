@@ -12,6 +12,7 @@ import {
   Btn,
 } from "@/components/ui";
 import apiClient from "@/lib/axios/apiClient";
+import { showToast } from "@/lib/toast";
 
 export default function FundsList() {
   const [page, setPage] = useState(1);
@@ -32,7 +33,7 @@ export default function FundsList() {
       a.download = "funds-report.pdf";
       a.click();
     } catch {
-      alert("Failed to generate report");
+      showToast.error("Failed to generate report");
     }
   };
 
