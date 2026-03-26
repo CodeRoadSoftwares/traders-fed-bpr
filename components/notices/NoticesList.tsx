@@ -89,6 +89,25 @@ export default function NoticesList() {
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {notice.message}
                   </p>
+                  {notice.attachments && notice.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {notice.attachments.map((a) => (
+                        <a
+                          key={a.url}
+                          href={a.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100 transition-colors"
+                        >
+                          <Icon
+                            d={a.type === "pdf" ? IC.download : IC.eye}
+                            className="w-3.5 h-3.5 text-gray-400"
+                          />
+                          {a.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-3">
                     <Icon d={IC.calendar} className="w-3.5 h-3.5" />
                     {new Date(notice.createdAt).toLocaleDateString("en-IN", {

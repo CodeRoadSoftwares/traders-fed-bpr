@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import apiClient from "@/lib/axios/apiClient";
 import { Shop } from "@/types";
 import RegisterShopForm from "./RegisterShopForm";
+import ShopPhotos from "./ShopPhotos";
 import { Icon, IC, StatusBadge, Spinner } from "@/components/ui";
 
 export default function MyShop() {
@@ -154,6 +155,15 @@ export default function MyShop() {
           traders-federation.com/verify
         </a>
       </p>
+
+      {/* Photos */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <ShopPhotos
+          shopId={shop._id}
+          initialPhotos={shop.photos ?? []}
+          initialPrimary={shop.primaryPhoto}
+        />
+      </div>
     </div>
   );
 }

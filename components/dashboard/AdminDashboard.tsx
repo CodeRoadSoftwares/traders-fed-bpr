@@ -111,6 +111,12 @@ export default function AdminDashboard({
           },
         ]
       : []),
+    {
+      href: "/carousel",
+      label: "Carousel",
+      icon: IC.eye,
+      desc: "Edit home slides",
+    },
   ];
 
   return (

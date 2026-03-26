@@ -7,8 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      // Add more hostnames here when integrating admin-uploaded images
-      // e.g. your S3 bucket, Cloudinary, etc.
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
     ],
   },
 };

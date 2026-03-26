@@ -12,6 +12,7 @@ const shopSchema = new Schema(
       required: true,
     },
     photos: [{ type: String }],
+    primaryPhoto: { type: String },
     location: {
       latitude: { type: Number },
       longitude: { type: Number },

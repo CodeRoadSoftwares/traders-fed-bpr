@@ -46,6 +46,7 @@ export function useNotices(params: UseNoticesParams = {}) {
     message: string;
     visibility: string;
     urgent: boolean;
+    attachments?: { url: string; name: string; type: "image" | "pdf" }[];
   }) => {
     try {
       await apiClient.post("/notice/create", data);

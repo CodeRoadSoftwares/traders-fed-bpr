@@ -20,6 +20,7 @@ export interface Shop {
   licenseNumber: string;
   category: string;
   photos?: string[];
+  primaryPhoto?: string;
   location?: {
     latitude: number;
     longitude: number;
@@ -43,6 +44,12 @@ export interface Shop {
   };
 }
 
+export interface NoticeAttachment {
+  url: string;
+  name: string;
+  type: "image" | "pdf";
+}
+
 export interface Notice {
   _id: string;
   createdBy: string | { _id: string; name: string };
@@ -50,6 +57,7 @@ export interface Notice {
   message: string;
   visibility: "PUBLIC" | "SHOPS";
   urgent: boolean;
+  attachments?: NoticeAttachment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -87,4 +95,10 @@ export interface DashboardStats {
     expense: number;
     balance: number;
   };
+}
+
+export interface CarouselSlide {
+  imageUrl: string;
+  title: string;
+  subtitle?: string;
 }
