@@ -1,6 +1,8 @@
 export interface User {
   _id: string;
   name: string;
+  fatherName: string;
+  aadharNumber: string;
   email: string;
   phone: number;
   address: {
@@ -16,6 +18,7 @@ export interface User {
 export interface Shop {
   _id: string;
   userId: string;
+  shopName: string;
   registrationNumber: string;
   licenseNumber: string;
   category: string;

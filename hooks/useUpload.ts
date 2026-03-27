@@ -1,6 +1,6 @@
 import apiClient from "@/lib/axios/apiClient";
 
-type Folder = "shops" | "notices" | "carousel";
+type Folder = "shops" | "notices" | "carousel" | "registration";
 
 /**
  * Upload a file to S3 via presigned URL.

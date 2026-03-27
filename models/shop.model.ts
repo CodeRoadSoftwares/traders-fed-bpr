@@ -4,6 +4,7 @@ import { Schema, Types, model, models } from "mongoose";
 const shopSchema = new Schema(
   {
     userId: { type: Types.ObjectId, ref: "User", required: true, unique: true },
+    shopName: { type: String, required: true },
     registrationNumber: { type: String, required: true, unique: true },
     licenseNumber: { type: String, required: true, unique: true },
     category: {

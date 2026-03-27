@@ -3,6 +3,8 @@ import z from "zod";
 
 export const userValidation = z.object({
   name: z.string(),
+  fatherName: z.string(),
+  aadharNumber: z.string().length(12),
   email: z.string(),
   password: z.string(),
   phone: z.number(),
