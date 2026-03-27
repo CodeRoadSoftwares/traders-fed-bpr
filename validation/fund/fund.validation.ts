@@ -6,6 +6,7 @@ export const fundSchema = z.object({
   amount: z.number().positive(),
   description: z.string(),
   date: z.string().datetime(),
+  shopUser: z.string().optional(), // Shop owner ID (for INCOME entries)
 });
 
 export type IFund = z.infer<typeof fundSchema>;

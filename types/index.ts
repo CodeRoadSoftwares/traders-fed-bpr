@@ -73,6 +73,7 @@ export interface Fund {
   description: string;
   date: string;
   createdBy: string | { _id: string; name: string };
+  shopUser?: string | { _id: string; name: string; shopName?: string };
   createdAt: string;
   updatedAt: string;
 }

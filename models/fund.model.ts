@@ -8,6 +8,7 @@ const fundSchema = new Schema(
     description: { type: String, required: true },
     date: { type: Date, required: true },
     createdBy: { type: Types.ObjectId, ref: "User", required: true },
+    shopUser: { type: Types.ObjectId, ref: "User" }, // Shop owner who contributed (for INCOME)
   },
   { timestamps: true },
 );

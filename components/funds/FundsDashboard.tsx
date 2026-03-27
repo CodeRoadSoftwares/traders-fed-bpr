@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useFunds } from "@/hooks/useFunds";
 import CreateFundModal from "@/components/funds/CreateFundModal";
@@ -81,16 +81,40 @@ function SummaryCards({
 export default function FundsDashboard() {
   const { user } = useUser();
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+  const isShop = user?.role === "SHOP";
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
   const [search, setSearch] = useState("");
   const [sortAmount, setSortAmount] = useState<"" | "asc" | "desc">("");
   const [showModal, setShowModal] = useState(false);
+  const [myContributions, setMyContributions] = useState<{
+    totalAmount: number;
+    contributions: typeof funds;
+  } | null>(null);
+  const [contributionsLoading, setContributionsLoading] = useState(false);
   const { funds, pagination, loading, deleteFund } = useFunds({
     page,
     type,
     limit: 15,
   });
+
+  useEffect(() => {
+    if (isShop) {
+      fetchMyContributions();
+    }
+  }, [isShop]);
+
+  const fetchMyContributions = async () => {
+    setContributionsLoading(true);
+    try {
+      const res = await apiClient.get("/fund/my-contributions");
+      setMyContributions(res.data);
+    } catch (error) {
+      console.error("Failed to fetch contributions", error);
+    } finally {
+      setContributionsLoading(false);
+    }
+  };
 
   const filtered = funds.filter((f) => {
     if (!search) return true;
@@ -207,6 +231,37 @@ export default function FundsDashboard() {
         <SummaryCards income={income} expense={expense} loading={loading} />
       </div>
 
+      {isShop && (
+        <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl border border-primary-200 p-6 mb-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+              <Icon d={IC.fund} className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                Your Contributions
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Total amount you have contributed to the federation
+              </p>
+              {contributionsLoading ? (
+                <Sk className="h-8 w-32" />
+              ) : (
+                <p className="text-3xl font-bold text-primary-600">
+                  ₹{myContributions?.totalAmount.toLocaleString("en-IN") || 0}
+                </p>
+              )}
+              {myContributions && myContributions.contributions.length > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {myContributions.contributions.length} contribution
+                  {myContributions.contributions.length > 1 ? "s" : ""} recorded
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-0">
@@ -300,14 +355,16 @@ export default function FundsDashboard() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  {["Date", "Type", "Category", "Description"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {["Date", "Type", "Category", "Shop", "Description"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     <button
                       onClick={() =>
@@ -348,6 +405,17 @@ export default function FundsDashboard() {
                     </td>
                     <td className="px-4 py-3.5 text-sm text-gray-700">
                       {fund.category}
+                    </td>
+                    <td className="px-4 py-3.5 text-sm text-gray-600">
+                      {fund.shopUser &&
+                      typeof fund.shopUser === "object" &&
+                      "shopName" in fund.shopUser ? (
+                        <span className="text-primary-600 font-medium">
+                          {fund.shopUser.shopName}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-sm text-gray-600 max-w-xs">
                       <span className="line-clamp-1">{fund.description}</span>

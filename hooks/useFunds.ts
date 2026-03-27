@@ -47,6 +47,7 @@ export function useFunds(params: UseFundsParams = {}) {
     amount: number;
     description: string;
     date: string;
+    shopUser?: string;
   }) => {
     try {
       await apiClient.post("/fund/create", data);
