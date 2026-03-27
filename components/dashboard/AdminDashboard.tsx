@@ -173,8 +173,7 @@ export default function AdminDashboard({
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10">
-      
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10 mb-24">
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -225,11 +224,17 @@ export default function AdminDashboard({
                 >
                   <Icon d={c.icon} className="w-5 h-5" />
                 </div>
-                <p className="text-xs font-medium text-gray-500 mb-1">{c.label}</p>
-                <p className={`text-2xl font-bold ${c.color} tabular-nums tracking-tight`}>
+                <p className="text-xs font-medium text-gray-500 mb-1">
+                  {c.label}
+                </p>
+                <p
+                  className={`text-2xl font-bold ${c.color} tabular-nums tracking-tight`}
+                >
                   {c.value}
                 </p>
-                <p className="text-xs font-medium text-gray-400 mt-1">{c.sub}</p>
+                <p className="text-xs font-medium text-gray-400 mt-1">
+                  {c.sub}
+                </p>
               </div>
             ))}
           </div>
@@ -238,7 +243,6 @@ export default function AdminDashboard({
 
       {/* ── Main Content Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-        
         {/* Pending Approvals */}
         <div className="lg:col-span-2 flex flex-col h-full">
           <SectionHeader
@@ -279,7 +283,8 @@ export default function AdminDashboard({
                     key={shop._id}
                     className="flex items-center gap-3 sm:gap-4 px-4 py-4 hover:bg-gray-50/50 transition-colors group"
                   >
-                    {shop.primaryPhoto || (shop.photos && shop.photos.length > 0) ? (
+                    {shop.primaryPhoto ||
+                    (shop.photos && shop.photos.length > 0) ? (
                       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-gray-100 relative shadow-sm">
                         <Image
                           src={shop.primaryPhoto || shop.photos![0]}
@@ -294,7 +299,7 @@ export default function AdminDashboard({
                         {shop.user?.name?.charAt(0).toUpperCase() || "?"}
                       </div>
                     )}
-                    
+
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors">
                         {shop.shopName || shop.user?.name}
@@ -315,7 +320,7 @@ export default function AdminDashboard({
                         )}
                       </div>
                     </div>
-                    
+
                     <Link
                       href={`/shops/${shop._id}`}
                       className="inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-white border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 transition-all shrink-0 shadow-sm"
@@ -332,14 +337,13 @@ export default function AdminDashboard({
 
         {/* Right Sidebar */}
         <div className="flex flex-col gap-6 lg:gap-8 h-full">
-          
           {/* Notices Section */}
           <div className="flex flex-col h-full">
             <SectionHeader
               title="Recent Notices"
               actionProps={{ href: "/notices", label: "All notices" }}
             />
-            
+
             {loading ? (
               <div className="space-y-3 flex-1">
                 {[...Array(3)].map((_, i) => (
@@ -358,11 +362,11 @@ export default function AdminDashboard({
                       <Sk className="h-3 w-4/5" />
                     </div>
                     <div className="flex items-center justify-between pt-2">
-                       <Sk className="h-3 w-16" />
-                       <div className="flex gap-2">
-                         <Sk className="h-4 w-4 rounded" />
-                         <Sk className="h-4 w-4 rounded" />
-                       </div>
+                      <Sk className="h-3 w-16" />
+                      <div className="flex gap-2">
+                        <Sk className="h-4 w-4 rounded" />
+                        <Sk className="h-4 w-4 rounded" />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -376,8 +380,11 @@ export default function AdminDashboard({
             ) : (
               <div className="space-y-3 flex-1">
                 {notices.map((n) => {
-                  const imgCount = n.attachments?.filter((a) => a.type === "image").length || 0;
-                  const pdfCount = n.attachments?.filter((a) => a.type === "pdf").length || 0;
+                  const imgCount =
+                    n.attachments?.filter((a) => a.type === "image").length ||
+                    0;
+                  const pdfCount =
+                    n.attachments?.filter((a) => a.type === "pdf").length || 0;
                   const hasAttachments = imgCount > 0 || pdfCount > 0;
 
                   return (
@@ -401,11 +408,11 @@ export default function AdminDashboard({
                           </span>
                         )}
                       </div>
-                      
+
                       <p className="text-xs font-medium text-gray-500 line-clamp-2 leading-relaxed mb-3">
                         {n.message}
                       </p>
-                      
+
                       <div className="flex items-center justify-between pt-1 border-t border-gray-50">
                         <p className="text-[11px] font-semibold text-gray-400">
                           {new Date(n.createdAt).toLocaleDateString("en-IN", {
@@ -417,13 +424,19 @@ export default function AdminDashboard({
                           <div className="flex items-center gap-2">
                             {imgCount > 0 && (
                               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                <Icon d={IC.image} className="w-3 h-3 text-gray-400" />
+                                <Icon
+                                  d={IC.image}
+                                  className="w-3 h-3 text-gray-400"
+                                />
                                 {imgCount}
                               </span>
                             )}
                             {pdfCount > 0 && (
                               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                <Icon d={IC.fileText} className="w-3 h-3 text-gray-400" />
+                                <Icon
+                                  d={IC.fileText}
+                                  className="w-3 h-3 text-gray-400"
+                                />
                                 {pdfCount}
                               </span>
                             )}
@@ -474,11 +487,17 @@ export default function AdminDashboard({
                     bar: "bg-danger-500",
                   },
                 ].map((row) => {
-                  const max = Math.max(stats.funds.income, stats.funds.expense, 1);
+                  const max = Math.max(
+                    stats.funds.income,
+                    stats.funds.expense,
+                    1,
+                  );
                   return (
                     <div key={row.label}>
                       <div className="flex justify-between items-center text-xs mb-1.5">
-                        <span className="font-semibold text-gray-500 uppercase tracking-wide">{row.label}</span>
+                        <span className="font-semibold text-gray-500 uppercase tracking-wide">
+                          {row.label}
+                        </span>
                         <span className={`font-bold ${row.color}`}>
                           ₹{row.value.toLocaleString("en-IN")}
                         </span>
@@ -493,12 +512,14 @@ export default function AdminDashboard({
                   );
                 })}
                 <div className="pt-3 border-t border-gray-100 flex justify-between items-center text-xs">
-                  <span className="font-semibold text-gray-500 uppercase tracking-wide">Balance</span>
+                  <span className="font-semibold text-gray-500 uppercase tracking-wide">
+                    Balance
+                  </span>
                   <span
                     className={`text-sm font-bold px-2.5 py-1 rounded-md shadow-sm border ${
-                      stats.funds.balance >= 0 
-                      ? "text-primary-700 bg-primary-50 border-primary-200" 
-                      : "text-danger-700 bg-danger-50 border-danger-200"
+                      stats.funds.balance >= 0
+                        ? "text-primary-700 bg-primary-50 border-primary-200"
+                        : "text-danger-700 bg-danger-50 border-danger-200"
                     }`}
                   >
                     ₹{stats.funds.balance.toLocaleString("en-IN")}
@@ -507,7 +528,6 @@ export default function AdminDashboard({
               </div>
             ) : null}
           </div>
-
         </div>
       </div>
 
@@ -544,4 +564,3 @@ export default function AdminDashboard({
     </main>
   );
 }
-

@@ -174,8 +174,7 @@ export default function ShopDashboard({
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10">
-      
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10 mb-24">
       {/* ── Header ── */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
@@ -193,11 +192,10 @@ export default function ShopDashboard({
 
       {/* ── Main Content Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-        
         {/* Certificate Section */}
         <div className="lg:col-span-2 flex flex-col h-full">
           <SectionHeader title="Certificate Status" />
-          
+
           {loading ? (
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5 shadow-sm flex-1">
               <div className="flex items-center gap-4">
@@ -246,7 +244,9 @@ export default function ShopDashboard({
                   <p className={`font-bold text-sm ${cfg!.color}`}>
                     {cfg!.label}
                   </p>
-                  <p className="text-xs font-medium text-gray-600 mt-1">{cfg!.desc}</p>
+                  <p className="text-xs font-medium text-gray-600 mt-1">
+                    {cfg!.desc}
+                  </p>
                 </div>
                 <StatusBadge status={shop.certificateStatus} />
               </div>
@@ -259,7 +259,8 @@ export default function ShopDashboard({
                   >
                     <Icon d={IC.alert} className="w-5 h-5 shrink-0" />
                     Certificate expires in {daysLeft} day
-                    {daysLeft !== 1 ? "s" : ""}. Contact the federation to renew.
+                    {daysLeft !== 1 ? "s" : ""}. Contact the federation to
+                    renew.
                   </div>
                 )}
 
@@ -323,7 +324,10 @@ export default function ShopDashboard({
                     className="text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1.5 group"
                   >
                     Full details{" "}
-                    <Icon d={IC.chevronRight} className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    <Icon
+                      d={IC.chevronRight}
+                      className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
+                    />
                   </Link>
                 </div>
               </div>
@@ -333,14 +337,13 @@ export default function ShopDashboard({
 
         {/* Right Sidebar */}
         <div className="flex flex-col gap-6 lg:gap-8 h-full">
-          
           {/* Notices Section */}
           <div className="flex flex-col h-full">
             <SectionHeader
               title="Latest Notices"
               actionProps={{ href: "/notices", label: "All" }}
             />
-            
+
             {loading ? (
               <div className="space-y-3 flex-1">
                 {[...Array(3)].map((_, i) => (
@@ -359,11 +362,11 @@ export default function ShopDashboard({
                       <Sk className="h-3 w-4/5" />
                     </div>
                     <div className="flex items-center justify-between pt-2">
-                       <Sk className="h-3 w-16" />
-                       <div className="flex gap-2">
-                         <Sk className="h-4 w-4 rounded" />
-                         <Sk className="h-4 w-4 rounded" />
-                       </div>
+                      <Sk className="h-3 w-16" />
+                      <div className="flex gap-2">
+                        <Sk className="h-4 w-4 rounded" />
+                        <Sk className="h-4 w-4 rounded" />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -377,8 +380,11 @@ export default function ShopDashboard({
             ) : (
               <div className="space-y-3 flex-1">
                 {notices.map((n) => {
-                  const imgCount = n.attachments?.filter((a) => a.type === "image").length || 0;
-                  const pdfCount = n.attachments?.filter((a) => a.type === "pdf").length || 0;
+                  const imgCount =
+                    n.attachments?.filter((a) => a.type === "image").length ||
+                    0;
+                  const pdfCount =
+                    n.attachments?.filter((a) => a.type === "pdf").length || 0;
                   const hasAttachments = imgCount > 0 || pdfCount > 0;
 
                   return (
@@ -402,11 +408,11 @@ export default function ShopDashboard({
                           </span>
                         )}
                       </div>
-                      
+
                       <p className="text-xs font-medium text-gray-500 line-clamp-2 leading-relaxed mb-3">
                         {n.message}
                       </p>
-                      
+
                       <div className="flex items-center justify-between pt-1 border-t border-gray-50">
                         <p className="text-[11px] font-semibold text-gray-400">
                           {new Date(n.createdAt).toLocaleDateString("en-IN", {
@@ -418,13 +424,19 @@ export default function ShopDashboard({
                           <div className="flex items-center gap-2">
                             {imgCount > 0 && (
                               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                <Icon d={IC.image} className="w-3 h-3 text-gray-400" />
+                                <Icon
+                                  d={IC.image}
+                                  className="w-3 h-3 text-gray-400"
+                                />
                                 {imgCount}
                               </span>
                             )}
                             {pdfCount > 0 && (
                               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                <Icon d={IC.fileText} className="w-3 h-3 text-gray-400" />
+                                <Icon
+                                  d={IC.fileText}
+                                  className="w-3 h-3 text-gray-400"
+                                />
                                 {pdfCount}
                               </span>
                             )}
@@ -451,7 +463,9 @@ export default function ShopDashboard({
                 <div className="w-8 h-8 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center shrink-0">
                   <Icon d={row.icon} className="w-4 h-4 text-gray-400" />
                 </div>
-                <p className="text-sm font-semibold text-gray-800 truncate">{row.value}</p>
+                <p className="text-sm font-semibold text-gray-800 truncate">
+                  {row.value}
+                </p>
               </div>
             ))}
           </div>
