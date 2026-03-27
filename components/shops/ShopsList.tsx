@@ -6,7 +6,7 @@ import { Icon, IC, Sk, StatusBadge, Pagination, Empty } from "@/components/ui";
 
 export default function ShopsList() {
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("PENDING");
   const [search, setSearch] = useState("");
   const { shops, pagination, loading, approveShop, rejectShop } = useShops({
     page,
@@ -46,7 +46,7 @@ export default function ShopsList() {
           onChange={(e) => setStatus(e.target.value)}
           className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700"
         >
-          <option value="">All Status</option>
+          <option value="ALL">All Status</option>
           <option value="PENDING">Pending</option>
           <option value="ACTIVE">Active</option>
           <option value="REJECTED">Rejected</option>
@@ -110,10 +110,10 @@ export default function ShopsList() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {shop.user?.name}
+                            {shop.shopName || shop.user?.name}
                           </p>
                           <p className="text-xs text-gray-400">
-                            {shop.user?.address?.district}
+                            {shop.user?.name} · {shop.user?.address?.district}
                           </p>
                         </div>
                       </div>
@@ -143,17 +143,16 @@ export default function ShopsList() {
                                 if (confirm("Approve this shop?"))
                                   approveShop(shop._id);
                               }}
-                              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                              className="text-xs px-2 py-1 bg-primary-50 text-primary-700 hover:bg-primary-100 rounded font-medium transition-colors"
                             >
                               Approve
                             </button>
-                            <span className="text-gray-200">|</span>
                             <button
                               onClick={() => {
                                 if (confirm("Reject this shop?"))
                                   rejectShop(shop._id);
                               }}
-                              className="text-xs text-danger-600 hover:text-danger-700 font-medium"
+                              className="text-xs px-2 py-1 bg-danger-50 text-danger-700 hover:bg-danger-100 rounded font-medium transition-colors"
                             >
                               Reject
                             </button>

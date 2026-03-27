@@ -441,9 +441,8 @@ export function HomeFooter() {
               </span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
-              A semi-government digital platform for shop registration,
-              certificate management, and community engagement across Jammu &
-              Kashmir.
+              A digital platform for shop registration, certificate management,
+              and community engagement across Bandipora.
             </p>
           </div>
           <div>
@@ -492,8 +491,8 @@ export function HomeFooter() {
         </div>
         <div className="border-t border-gray-800 pt-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
           <p>
-            © {new Date().getFullYear()} Traders Federation, Jammu & Kashmir.
-            All rights reserved.
+            © {new Date().getFullYear()} Traders Federation, Bandipora. All
+            rights reserved.
           </p>
           <p className="text-gray-600">Official Digital Platform</p>
         </div>

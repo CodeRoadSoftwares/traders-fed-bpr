@@ -32,6 +32,28 @@ export default function ShopDetails({
     }
   };
 
+  const handleApprove = async () => {
+    if (!shop || !confirm("Approve this shop?")) return;
+    try {
+      await apiClient.post("/certificate/approve", { id: shop._id });
+      showToast.success("Shop approved");
+      params.then((p) => fetchShop(p.id));
+    } catch {
+      showToast.error("Failed to approve shop");
+    }
+  };
+
+  const handleReject = async () => {
+    if (!shop || !confirm("Reject this shop?")) return;
+    try {
+      await apiClient.post("/certificate/reject", { id: shop._id });
+      showToast.success("Shop rejected");
+      params.then((p) => fetchShop(p.id));
+    } catch {
+      showToast.error("Failed to reject shop");
+    }
+  };
+
   const handleRenew = async () => {
     if (!shop || !confirm("Renew certificate for this shop?")) return;
     try {
@@ -82,15 +104,26 @@ export default function ShopDetails({
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {shop.user?.name}
+                {shop.shopName || shop.user?.name}
               </h1>
+              <p className="text-sm text-gray-500 mt-0.5">{shop.user?.name}</p>
               <p className="text-sm text-gray-500 capitalize mt-0.5">
                 {shop.category?.replace(/_/g, " ")}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={shop.certificateStatus} />
+            {isAdmin && shop.certificateStatus === "PENDING" && (
+              <>
+                <Btn onClick={handleApprove} variant="primary">
+                  <Icon d={IC.check2} className="w-4 h-4" /> Approve
+                </Btn>
+                <Btn onClick={handleReject} variant="danger">
+                  <Icon d={IC.x} className="w-4 h-4" /> Reject
+                </Btn>
+              </>
+            )}
             {isAdmin && shop.certificateStatus === "ACTIVE" && (
               <Btn onClick={handleRenew} variant="secondary">
                 <Icon d={IC.refresh} className="w-4 h-4" /> Renew

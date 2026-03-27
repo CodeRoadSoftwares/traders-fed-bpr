@@ -65,7 +65,7 @@ export default function ShopDirectory() {
         </p>
         <h1 className="text-2xl font-bold text-gray-900">Shop Directory</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Browse verified and registered businesses across Jammu & Kashmir
+          Browse verified and registered businesses across Bandipora, Jammu & Kashmir
         </p>
       </div>
 

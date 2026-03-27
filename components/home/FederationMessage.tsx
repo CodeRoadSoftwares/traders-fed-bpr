@@ -11,7 +11,9 @@ export default function FederationMessage() {
             <div>
               <p className="font-semibold text-gray-900 text-sm">President</p>
               <p className="text-xs text-gray-500">Traders Federation</p>
-              <p className="text-xs text-gray-400 mt-0.5">Jammu & Kashmir</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Bandipora, Jammu & Kashmir
+              </p>
             </div>
           </div>
 
@@ -28,22 +30,23 @@ export default function FederationMessage() {
               </span>
               <div className="relative pl-4 border-l-4 border-primary-600 space-y-2.5">
                 <p className="text-gray-700 text-sm leading-relaxed">
-                  On behalf of the Traders Federation of Jammu & Kashmir, I
-                  welcome you to our official digital platform. This portal has
-                  been established to bring transparency, accountability, and
-                  ease of access to every registered trader in our region.
+                  On behalf of the Traders Federation of Bandipora Jammu &
+                  Kashmir, I welcome you to our official digital platform. This
+                  portal has been established to bring transparency,
+                  accountability, and ease of access to every registered trader
+                  in our region.
                 </p>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   Through this platform, traders can register their shops,
                   obtain digital certificates, stay informed through official
                   notices, and access financial records of the federation. We
                   are committed to building a stronger, more connected trading
-                  community across all districts of Jammu & Kashmir.
+                  community across Bandipora.
                 </p>
               </div>
             </blockquote>
             <p className="mt-4 text-xs text-gray-400 italic">
-              — President, Traders Federation J&K
+              — President, Traders Federation Bandipora
             </p>
           </div>
         </div>

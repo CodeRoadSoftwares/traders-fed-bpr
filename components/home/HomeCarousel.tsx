@@ -8,7 +8,7 @@ const FALLBACK: CarouselSlide[] = [
   {
     imageUrl:
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1400&q=80",
-    title: "Empowering Traders Across Jammu & Kashmir",
+    title: "Empowering Traders Across Bandipora",
     subtitle:
       "Official digital platform for shop registration and certification",
   },
@@ -73,7 +73,7 @@ export default function HomeCarousel() {
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-5 sm:px-8">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-sm text-white text-[10px] sm:text-xs font-semibold rounded-full mb-3 sm:mb-4 border border-white/30">
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  Official Platform — Jammu & Kashmir
+                  Official Platform Bandipora, Jammu & Kashmir
                 </div>
                 <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white max-w-3xl leading-snug drop-shadow-lg">
                   {slide.title}

@@ -31,7 +31,7 @@ export default function HomeHero() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-700 text-xs font-semibold rounded-full mb-5 border border-primary-100">
             <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse" />
-            Official Digital Platform — Jammu & Kashmir
+            Official Digital Platform — Bandipora Jammu & Kashmir
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
             Traders Federation
@@ -40,8 +40,8 @@ export default function HomeHero() {
           </h1>
           <p className="text-base sm:text-lg text-gray-500 mb-7 leading-relaxed max-w-2xl">
             The official platform for shop registration, certificate management,
-            public notices, and financial transparency for traders across Jammu
-            & Kashmir.
+            public notices, and financial transparency for traders across
+            Bandipora Jammu & Kashmir.
           </p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <Link
