@@ -15,10 +15,14 @@ export async function POST(req: Request) {
     }
     const data = await req.json();
     const parsedData: IFund = fundSchema.parse(data);
-    const fund = await Fund.create({
+    const fundData: Record<string, unknown> = {
       ...parsedData,
       createdBy: new Types.ObjectId(user.id),
-    });
+    };
+    if (parsedData.shopUser) {
+      fundData.shopUser = new Types.ObjectId(parsedData.shopUser);
+    }
+    const fund = await Fund.create(fundData);
     if (!fund) {
       return NextResponse.json(
         { message: "failed to create fund entry" },

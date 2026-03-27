@@ -38,13 +38,16 @@ export async function PUT(req: NextRequest) {
     );
     await Promise.allSettled(removed.map((url: string) => deleteFromS3(url)));
 
-    shop.photos = photos;
-    shop.primaryPhoto = primaryPhoto || photos[0] || null;
-    await shop.save();
+    const updatedPrimaryPhoto = primaryPhoto || photos[0] || null;
+
+    await Shop.updateOne(
+      { _id: shop._id },
+      { $set: { photos, primaryPhoto: updatedPrimaryPhoto } }
+    );
 
     return NextResponse.json({
       message: "photos updated",
-      data: { photos: shop.photos, primaryPhoto: shop.primaryPhoto },
+      data: { photos, primaryPhoto: updatedPrimaryPhoto },
     });
   } catch (error) {
     return NextResponse.json({ message: String(error) }, { status: 500 });

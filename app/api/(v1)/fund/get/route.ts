@@ -21,14 +21,34 @@ export async function GET(req: NextRequest) {
       match.date = dateFilter;
     }
 
-    const [data, total] = await Promise.all([
+    const [funds, total] = await Promise.all([
       Fund.find(match)
         .sort({ date: -1 })
         .skip(skip)
         .limit(limit)
-        .populate("createdBy", "name"),
+        .populate("createdBy", "name")
+        .populate("shopUser", "name"),
       Fund.countDocuments(match),
     ]);
+    const data = await Promise.all(
+      funds.map(async (fund) => {
+        const fundObj = fund.toObject();
+        if (fundObj.shopUser) {
+          const { Shop } = await import("@/lib/db/models");
+          const shop = await Shop.findOne({
+            userId: fundObj.shopUser._id,
+          }).select("shopName");
+          return {
+            ...fundObj,
+            shopUser: {
+              ...fundObj.shopUser,
+              shopName: shop?.shopName || null,
+            },
+          };
+        }
+        return fundObj;
+      }),
+    );
 
     return NextResponse.json({
       data,
