@@ -4,6 +4,7 @@ const publicPaths = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/refresh",
+  "/api/upload/presign",
   "/api/shop/search",
   "/api/shop/get",
   "/api/shop/categories",
