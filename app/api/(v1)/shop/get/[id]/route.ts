@@ -28,8 +28,10 @@ export async function GET(
         $project: {
           registrationNumber: 1,
           licenseNumber: 1,
+          shopName: 1,
           category: 1,
           photos: 1,
+          primaryPhoto: 1,
           location: 1,
           certificateNumber: 1,
           certificateStatus: 1,

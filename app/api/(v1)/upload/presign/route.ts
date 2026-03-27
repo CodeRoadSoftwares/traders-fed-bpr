@@ -9,11 +9,6 @@ const ALLOWED_ALL = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ message: "unauthorized" }, { status: 401 });
-    }
-
     const { folder, mimeType } = await req.json();
 
     if (!folder || !mimeType) {
@@ -22,8 +17,15 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+
+    const user = await getUser();
+
+    if (folder !== "registration" && !user) {
+      return NextResponse.json({ message: "unauthorized" }, { status: 401 });
+    }
+
     if (folder === "carousel") {
-      const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+      const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
       if (!isAdmin) {
         return NextResponse.json({ message: "unauthorized" }, { status: 403 });
       }
@@ -40,7 +42,10 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (folder === "shops" && !ALLOWED_IMAGE_TYPES.includes(mimeType)) {
+    if (
+      (folder === "shops" || folder === "registration") &&
+      !ALLOWED_IMAGE_TYPES.includes(mimeType)
+    ) {
       return NextResponse.json(
         { message: "only images allowed for shops" },
         { status: 400 },
@@ -48,7 +53,8 @@ export async function POST(req: NextRequest) {
     }
 
     const ext = mimeType.split("/")[1].replace("jpeg", "jpg");
-    const key = `${folder}/${user.id}/${randomUUID()}.${ext}`;
+    const segment = user ? user.id : randomUUID();
+    const key = `${folder}/${segment}/${randomUUID()}.${ext}`;
     const uploadUrl = await getUploadUrl(key, mimeType);
     const publicUrl = s3Url(key);
 

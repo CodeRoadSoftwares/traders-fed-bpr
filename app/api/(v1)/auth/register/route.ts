@@ -1,47 +1,90 @@
 import { connectDb } from "@/lib/db/db";
+import { generateCertificateNumber } from "@/lib/certificate/genCertificate";
 import { generateTokens } from "@/lib/jwt/jwt";
-import { User } from "@/lib/db/models";
+import { User, Shop } from "@/lib/db/models";
 import { IUser, userValidation } from "@/validation/user/user.validation";
+import { IShop, shopSchema } from "@/validation/shop/shop.validation";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
+import { Types } from "mongoose";
 
 export async function POST(req: Request) {
   try {
     await connectDb();
     const data = await req.json();
-    const parsedData: IUser = userValidation.parse(data);
-    const { email, password, phone, name, address } = parsedData;
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+
+    const parsedUser: IUser = userValidation.parse(data);
+    const parsedShop: IShop = shopSchema.parse(data);
+
+    const { email, password, phone, name, fatherName, aadharNumber, address } =
+      parsedUser;
+    const {
+      shopName,
+      registrationNumber,
+      licenseNumber,
+      category,
+      primaryPhoto,
+      photos,
+    } = parsedShop;
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }, { aadharNumber }],
+    });
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists" },
-        { status: 404 },
+        { status: 409 },
       );
     }
+
+    const existingShop = await Shop.findOne({
+      $or: [{ registrationNumber }, { licenseNumber }],
+    });
+    if (existingShop) {
+      return NextResponse.json(
+        {
+          message:
+            "Shop with this registration or license number already exists",
+        },
+        { status: 409 },
+      );
+    }
+
     const hashedPassword = await hash(password, 10);
+
     const newUser = await User.create({
       name,
+      fatherName,
+      aadharNumber,
       email,
       phone,
       address,
       password: hashedPassword,
       role: "SHOP",
     });
-    if (!newUser) {
-      return NextResponse.json(
-        { message: "Failed to create user" },
-        { status: 404 },
-      );
-    }
+
+    await Shop.create({
+      userId: new Types.ObjectId(newUser._id),
+      shopName,
+      registrationNumber,
+      licenseNumber,
+      category,
+      primaryPhoto,
+      photos: photos?.length ? photos : [primaryPhoto],
+      certificateNumber: generateCertificateNumber(),
+      certificateStatus: "PENDING",
+    });
 
     const res = NextResponse.json(
-      { message: "User created successfully" },
+      { message: "Registration successful. Awaiting admin approval." },
       { status: 201 },
     );
+
     const { accessToken, refreshToken } = generateTokens(
       newUser._id.toString(),
       newUser.role,
     );
+
     res.cookies.set("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

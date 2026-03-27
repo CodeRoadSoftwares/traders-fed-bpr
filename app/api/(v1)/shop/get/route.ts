@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const match: Record<string, unknown> = {};
-    if (status) {
+    if (status && status !== "ALL") {
       match.certificateStatus = status;
-    } else {
+    } else if (!status) {
       match.certificateStatus = "ACTIVE";
     }
     if (category) match.category = category;
@@ -60,8 +60,10 @@ export async function GET(req: NextRequest) {
         $project: {
           registrationNumber: 1,
           licenseNumber: 1,
+          shopName: 1,
           category: 1,
           photos: 1,
+          primaryPhoto: 1,
           location: 1,
           certificateNumber: 1,
           certificateStatus: 1,
