@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser";
@@ -52,9 +53,12 @@ export default function Navbar() {
 
   const isActive = (href: string) => pathname === href;
   const links = user ? getAuthLinks(user.role) : publicLinks;
-  
+
   // Bottom bar uses first 4 links if logged in (to leave room for Profile tab)
   const bottomLinks = user ? links.slice(0, 4) : links.slice(0, 5);
+
+  // Track previous pathname to close menus on route change
+  const prevPathnameRef = useRef(pathname);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -79,9 +83,14 @@ export default function Navbar() {
 
   // Close mobile menus on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
-    setDesktopDropdownOpen(false);
-    setMobileDropdownOpen(false);
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      queueMicrotask(() => {
+        setMobileMenuOpen(false);
+        setDesktopDropdownOpen(false);
+        setMobileDropdownOpen(false);
+      });
+    }
   }, [pathname]);
 
   return (
@@ -89,15 +98,20 @@ export default function Navbar() {
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            
             {/* Left Box: Logo */}
             <div className="flex items-center gap-3">
               <Link
                 href={user ? "/dashboard" : "/"}
                 className="flex items-center gap-2.5 group mr-2"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow shrink-0">
-                  <span className="text-white font-bold text-sm">TF</span>
+                <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 -my-2">
+                  <Image
+                    src="/assets/LOGO.jpeg"
+                    alt="Traders Federation Logo"
+                    fill
+                    className="object-contain mix-blend-multiply"
+                    priority
+                  />
                 </div>
                 <span className="font-bold text-base text-gray-900">
                   Traders Federation
@@ -128,9 +142,14 @@ export default function Navbar() {
               {user ? (
                 <>
                   {/* Desktop Profile (hidden on mobile) */}
-                  <div className="hidden md:block relative" ref={desktopDropdownRef}>
+                  <div
+                    className="hidden md:block relative"
+                    ref={desktopDropdownRef}
+                  >
                     <button
-                      onClick={() => setDesktopDropdownOpen(!desktopDropdownOpen)}
+                      onClick={() =>
+                        setDesktopDropdownOpen(!desktopDropdownOpen)
+                      }
                       className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition-colors"
                     >
                       <div className="w-7 h-7 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shrink-0">
@@ -171,14 +190,17 @@ export default function Navbar() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Mobile Menu Toggle (Right Corner) */}
                   <button
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     className="lg:hidden p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:bg-gray-100"
                     aria-label="Toggle menu"
                   >
-                    <Icon d={mobileMenuOpen ? IC.close : IC.menu} className="w-6 h-6" />
+                    <Icon
+                      d={mobileMenuOpen ? IC.close : IC.menu}
+                      className="w-6 h-6"
+                    />
                   </button>
                 </>
               ) : (
@@ -265,7 +287,9 @@ export default function Navbar() {
               <button
                 onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
                 className={`w-full h-full flex flex-col items-center justify-center gap-1 transition-colors ${
-                  mobileDropdownOpen ? "text-primary-600" : "text-gray-500 hover:text-gray-700"
+                  mobileDropdownOpen
+                    ? "text-primary-600"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 <div className="w-5 h-5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shrink-0 shadow-sm mt-0.5">

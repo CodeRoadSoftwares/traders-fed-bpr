@@ -13,11 +13,22 @@ export async function GET() {
     }
     const shop = await Shop.findOne({
       userId: new Types.ObjectId(user.id),
-    }).populate("userId", "-password");
+    })
+      .populate("userId", "name email phone address fatherName")
+      .lean();
+
     if (!shop) {
       return NextResponse.json({ message: "shop not found" }, { status: 404 });
     }
-    return NextResponse.json(shop, { status: 200 });
+
+    // Transform userId to user for frontend compatibility
+    const shopData = {
+      ...shop,
+      user: shop.userId,
+      userId: shop.userId._id,
+    };
+
+    return NextResponse.json(shopData, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: error }, { status: 500 });
   }

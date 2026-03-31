@@ -41,8 +41,8 @@ export default function HomeStatsBar({ stats, loading }: Props) {
       color: "text-warning-600",
     },
     {
-      label: "Districts Covered",
-      value: 20,
+      label: "District Covered",
+      value: "Bandipora",
       icon: ICONS.location,
       color: "text-primary-600",
     },

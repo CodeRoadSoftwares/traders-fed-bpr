@@ -4,6 +4,7 @@ import apiClient from "@/lib/axios/apiClient";
 import { Shop } from "@/types";
 import RegisterShopForm from "./RegisterShopForm";
 import ShopPhotos from "./ShopPhotos";
+import CertificatePreview from "./CertificatePreview";
 import { Icon, IC, StatusBadge, Spinner } from "@/components/ui";
 
 export default function MyShop() {
@@ -37,25 +38,30 @@ export default function MyShop() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1.5 shadow-sm inline-block px-2 py-0.5 bg-primary-50 rounded-md border border-primary-100">
             Member Area
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">My Shop Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">
+            My Shop Profile
+          </h1>
           <p className="text-gray-500 text-sm mt-1.5 font-medium">
-            Manage your shop registration, certificate details, and storefront gallery
+            Manage your shop registration, certificate details, and storefront
+            gallery
           </p>
         </div>
       </div>
 
+      {/* Certificate Preview - Show only if ACTIVE */}
+      {shop.certificateStatus === "ACTIVE" && (
+        <CertificatePreview shop={shop} />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-start">
-        
         {/* ─── LEFT COLUMN: Details & Status ─── */}
         <div className="lg:col-span-3 space-y-6">
-          
           {/* Status Alerts */}
           {shop.certificateStatus === "PENDING" && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-warning-50 border border-warning-200 rounded-2xl shadow-sm">
@@ -63,59 +69,86 @@ export default function MyShop() {
                 <Icon d={IC.clock} className="w-6 h-6 text-warning-500" />
               </div>
               <div>
-                <h3 className="text-warning-800 font-bold mb-0.5">Approval Pending</h3>
-                <p className="text-sm text-warning-700 font-medium">
-                  Your shop registration is pending approval by a federation administrator. Some features may be limited until active.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {shop.certificateStatus === "REJECTED" && (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-danger-50 border border-danger-200 rounded-2xl shadow-sm">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-danger-100">
-                <Icon d={IC.alert} className="w-6 h-6 text-danger-500 animate-pulse" />
-              </div>
-              <div>
-                <h3 className="text-danger-800 font-bold mb-0.5">Registration Rejected</h3>
-                <p className="text-sm text-danger-700 font-medium">
-                  Your shop registration was rejected. Please contact the federation office to resolve any critical issues.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {daysLeft !== null && daysLeft <= 30 && shop.certificateStatus === "ACTIVE" && (
-            <div className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl shadow-sm border ${daysLeft <= 7 ? "bg-danger-50 border-danger-200" : "bg-warning-50 border-warning-200"}`}>
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
-                <Icon d={IC.alert} className={`w-6 h-6 ${daysLeft <= 7 ? "text-danger-500 animate-pulse" : "text-warning-500"}`} />
-              </div>
-              <div>
-                <h3 className={`font-bold mb-0.5 ${daysLeft <= 7 ? "text-danger-800" : "text-warning-800"}`}>
-                  Certificate Expiring Soon
+                <h3 className="text-warning-800 font-bold mb-0.5">
+                  Approval Pending
                 </h3>
-                <p className={`text-sm font-medium ${daysLeft <= 7 ? "text-danger-700" : "text-warning-700"}`}>
-                  Your certificate expires in {daysLeft} day{daysLeft !== 1 ? "s" : ""}. Please contact the federation to initiate renewal.
+                <p className="text-sm text-warning-700 font-medium">
+                  Your shop registration is pending approval by a federation
+                  administrator. Some features may be limited until active.
                 </p>
               </div>
             </div>
           )}
 
+          {shop.certificateStatus === "REJECTED" && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-danger-50 border border-danger-200 rounded-2xl shadow-sm">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-danger-100">
+                <Icon
+                  d={IC.alert}
+                  className="w-6 h-6 text-danger-500 animate-pulse"
+                />
+              </div>
+              <div>
+                <h3 className="text-danger-800 font-bold mb-0.5">
+                  Registration Rejected
+                </h3>
+                <p className="text-sm text-danger-700 font-medium">
+                  Your shop registration was rejected. Please contact the
+                  federation office to resolve any critical issues.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {daysLeft !== null &&
+            daysLeft <= 30 &&
+            shop.certificateStatus === "ACTIVE" && (
+              <div
+                className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl shadow-sm border ${daysLeft <= 7 ? "bg-danger-50 border-danger-200" : "bg-warning-50 border-warning-200"}`}
+              >
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
+                  <Icon
+                    d={IC.alert}
+                    className={`w-6 h-6 ${daysLeft <= 7 ? "text-danger-500 animate-pulse" : "text-warning-500"}`}
+                  />
+                </div>
+                <div>
+                  <h3
+                    className={`font-bold mb-0.5 ${daysLeft <= 7 ? "text-danger-800" : "text-warning-800"}`}
+                  >
+                    Certificate Expiring Soon
+                  </h3>
+                  <p
+                    className={`text-sm font-medium ${daysLeft <= 7 ? "text-danger-700" : "text-warning-700"}`}
+                  >
+                    Your certificate expires in {daysLeft} day
+                    {daysLeft !== 1 ? "s" : ""}. Please contact the federation
+                    to initiate renewal.
+                  </p>
+                </div>
+              </div>
+            )}
+
           {/* Core Certificate Card */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600" />
-            
+
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 mb-8">
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 rounded-2xl flex items-center justify-center text-primary-700 font-bold text-2xl shadow-sm shrink-0">
-                  {shop.shopName?.charAt(0).toUpperCase() || shop.user?.name?.charAt(0).toUpperCase() || "S"}
+                  {shop.shopName?.charAt(0).toUpperCase() ||
+                    shop.user?.name?.charAt(0).toUpperCase() ||
+                    "S"}
                 </div>
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                     {shop.shopName || shop.user?.name || "My Shop"}
                   </h1>
                   <div className="inline-flex items-center gap-1.5 mt-2 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 capitalize">
-                    <Icon d={IC.building} className="w-3.5 h-3.5 text-gray-400" />
+                    <Icon
+                      d={IC.building}
+                      className="w-3.5 h-3.5 text-gray-400"
+                    />
                     {shop.category?.replace(/_/g, " ")}
                   </div>
                 </div>
@@ -127,12 +160,16 @@ export default function MyShop() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                 {
+                {
                   label: "Registration No.",
                   value: shop.registrationNumber,
                   icon: IC.building,
                 },
-                { label: "License No.", value: shop.licenseNumber, icon: IC.check },
+                {
+                  label: "License No.",
+                  value: shop.licenseNumber,
+                  icon: IC.check,
+                },
                 {
                   label: "Certificate No.",
                   value: shop.certificateNumber,
@@ -194,7 +231,6 @@ export default function MyShop() {
 
         {/* ─── RIGHT COLUMN: Gallery & Verify ─── */}
         <div className="lg:col-span-2 space-y-6">
-          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
               <Icon d={IC.image} className="w-5 h-5 text-gray-400" />
@@ -202,36 +238,21 @@ export default function MyShop() {
                 Storefront Gallery
               </p>
             </div>
-            
+
             <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-5">
               <p className="text-xs font-semibold text-primary-700">
-                Upload up to 5 images to showcase your store, inventory, or products. Click on any uploaded image to set it as your primary cover photo!
+                Upload up to 5 images to showcase your store, inventory, or
+                products. Click on any uploaded image to set it as your primary
+                cover photo!
               </p>
             </div>
-            
+
             <ShopPhotos
               shopId={shop._id}
               initialPhotos={shop.photos ?? []}
               initialPrimary={shop.primaryPhoto}
             />
           </div>
-
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
-            <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Icon d={IC.shield} className="w-6 h-6 text-gray-400" />
-            </div>
-            <h3 className="text-sm font-bold text-gray-900 mb-2">Public Verification</h3>
-            <p className="text-xs text-gray-500 font-medium mb-4 leading-relaxed">
-              Share your certificate number <span className="font-mono bg-gray-100 px-1 py-0.5 rounded text-gray-700">{shop.certificateNumber}</span> so customers and authorities can verify your status at:
-            </p>
-            <a
-              href="/verify"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-primary-600 hover:text-primary-700 text-xs font-bold rounded-lg transition-colors border-dashed"
-            >
-              traders-federation.com/verify <Icon d={IC.externalLink} className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
         </div>
       </div>
     </div>
