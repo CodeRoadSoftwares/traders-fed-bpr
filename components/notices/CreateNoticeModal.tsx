@@ -9,8 +9,10 @@ import { NoticeAttachment } from "@/types";
 
 export default function CreateNoticeModal({
   onClose,
+  onSuccess,
 }: {
   onClose: () => void;
+  onSuccess?: () => void;
 }) {
   const { createNotice } = useNotices();
   const [form, setForm] = useState({
@@ -54,6 +56,7 @@ export default function CreateNoticeModal({
     setLoading(true);
     try {
       await createNotice({ ...form, attachments });
+      onSuccess?.();
       onClose();
     } catch {
       showToast.error("Failed to create notice");

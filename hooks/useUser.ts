@@ -1,25 +1,3 @@
-import { useState, useEffect } from "react";
-import apiClient from "@/lib/axios/apiClient";
-import { User } from "@/types";
-
-export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
-    try {
-      const response = await apiClient.get("/user/me");
-      setUser(response.data);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { user, loading, refetch: fetchUser };
-}
+// Re-exports the shared UserContext so all components get the same user instance.
+// This prevents stale UI in Navbar/BottomBar when navigating between pages.
+export { useUserContext as useUser } from "@/contexts/UserContext";

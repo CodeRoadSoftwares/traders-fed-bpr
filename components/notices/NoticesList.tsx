@@ -6,14 +6,24 @@ import { useUser } from "@/hooks/useUser";
 import { Notice, NoticeAttachment } from "@/types";
 import CreateNoticeModal from "./CreateNoticeModal";
 import NoticeDetailModal from "@/components/dashboard/NoticeDetailModal";
-import { Icon, IC, Sk, StatusBadge, Pagination, Empty, Btn } from "@/components/ui";
+import {
+  Icon,
+  IC,
+  Sk,
+  StatusBadge,
+  Pagination,
+  Empty,
+  Btn,
+} from "@/components/ui";
 
 export default function NoticesList() {
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
-  
-  const { notices, pagination, loading, deleteNotice } = useNotices({ page });
+
+  const { notices, pagination, loading, deleteNotice, refetch } = useNotices({
+    page,
+  });
   const { user } = useUser();
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
@@ -30,7 +40,9 @@ export default function NoticesList() {
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1.5 shadow-sm inline-block px-2 py-0.5 bg-primary-50 rounded-md border border-primary-100">
             Announcements
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">Notices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">
+            Notices
+          </h1>
           <p className="text-gray-500 text-sm mt-1 font-medium">
             Official announcements and updates from the Traders Federation
           </p>
@@ -78,14 +90,14 @@ export default function NoticesList() {
             const imgs = images(notice.attachments);
             const docs = pdfs(notice.attachments);
             const coverImage = imgs.length > 0 ? imgs[0].url : null;
-            
+
             return (
               <div
                 key={notice._id}
                 onClick={() => setSelectedNotice(notice)}
                 className={`flex flex-col bg-white rounded-2xl border transition-all duration-300 cursor-pointer group hover:shadow-xl hover:-translate-y-1 ${
-                  notice.urgent 
-                    ? "border-danger-200 shadow-[0_4px_20px_-5px_rgba(239,68,68,0.15)] bg-gradient-to-br from-white to-danger-50/30" 
+                  notice.urgent
+                    ? "border-danger-200 shadow-[0_4px_20px_-5px_rgba(239,68,68,0.15)] bg-gradient-to-br from-white to-danger-50/30"
                     : "border-gray-100 shadow-sm hover:border-primary-200"
                 }`}
               >
@@ -101,7 +113,9 @@ export default function NoticesList() {
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4" />
                   </div>
                 ) : (
-                  <div className={`h-2 w-full rounded-t-2xl shrink-0 ${notice.urgent ? 'bg-danger-500' : 'bg-primary-500'}`} />
+                  <div
+                    className={`h-2 w-full rounded-t-2xl shrink-0 ${notice.urgent ? "bg-danger-500" : "bg-primary-500"}`}
+                  />
                 )}
 
                 <div className="p-5 flex flex-col flex-1">
@@ -120,7 +134,11 @@ export default function NoticesList() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm("Are you sure you want to completely delete this notice? This action cannot be undone.")) {
+                          if (
+                            confirm(
+                              "Are you sure you want to completely delete this notice? This action cannot be undone.",
+                            )
+                          ) {
                             deleteNotice(notice._id);
                           }
                         }}
@@ -133,7 +151,9 @@ export default function NoticesList() {
                   </div>
 
                   {/* Content */}
-                  <h3 className={`font-bold text-lg leading-snug mb-2 group-hover:text-primary-600 transition-colors line-clamp-2 ${!coverImage ? 'mt-1' : ''}`}>
+                  <h3
+                    className={`font-bold text-lg leading-snug mb-2 group-hover:text-primary-600 transition-colors line-clamp-2 ${!coverImage ? "mt-1" : ""}`}
+                  >
                     {notice.title}
                   </h3>
                   <p className="text-sm font-medium text-gray-500 leading-relaxed line-clamp-3 mb-4 flex-1">
@@ -155,13 +175,19 @@ export default function NoticesList() {
                       <div className="flex items-center gap-2">
                         {imgs.length > 0 && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 border border-gray-100 rounded text-[10px] font-bold text-gray-500">
-                            <Icon d={IC.image} className="w-3 h-3 text-gray-400" />
+                            <Icon
+                              d={IC.image}
+                              className="w-3 h-3 text-gray-400"
+                            />
                             {imgs.length}
                           </div>
                         )}
                         {docs.length > 0 && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 border border-gray-100 rounded text-[10px] font-bold text-gray-500">
-                            <Icon d={IC.fileText} className="w-3 h-3 text-gray-400" />
+                            <Icon
+                              d={IC.fileText}
+                              className="w-3 h-3 text-gray-400"
+                            />
                             {docs.length}
                           </div>
                         )}
@@ -182,8 +208,13 @@ export default function NoticesList() {
       )}
 
       {/* Modals */}
-      {showModal && <CreateNoticeModal onClose={() => setShowModal(false)} />}
-      
+      {showModal && (
+        <CreateNoticeModal
+          onClose={() => setShowModal(false)}
+          onSuccess={refetch}
+        />
+      )}
+
       {selectedNotice && (
         <NoticeDetailModal
           notice={selectedNotice}

@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const match: Record<string, unknown> = {};
-    if (!user || user.role === "SHOP") {
+    if (!user) {
+      match.visibility = "PUBLIC";
+    } else if (user.role === "SHOP") {
       match.visibility = { $in: ["PUBLIC", "SHOPS"] };
     }
 

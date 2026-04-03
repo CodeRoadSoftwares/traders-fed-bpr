@@ -173,7 +173,7 @@ export default function AdminDashboard({
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10 mb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 space-y-2  mb-24">
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">

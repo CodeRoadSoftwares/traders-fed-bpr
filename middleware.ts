@@ -38,6 +38,16 @@ const superAdminPaths = [
   "/api/admin/update",
 ];
 
+// Page routes that require authentication
+const protectedPagePaths = [
+  "/dashboard",
+  "/my-shop",
+  "/shops",
+  "/certificates",
+  "/carousel",
+  "/admins",
+];
+
 function decodeJWT(token: string): { id: string; role: string } | null {
   try {
     const parts = token.split(".");
@@ -58,6 +68,31 @@ function decodeJWT(token: string): { id: string; role: string } | null {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // ── Page route protection ──────────────────────────────────────────────────
+  if (
+    protectedPagePaths.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    )
+  ) {
+    const accessToken = req.cookies.get("accessToken")?.value;
+    const refreshToken = req.cookies.get("refreshToken")?.value;
+
+    const hasValidAccess = accessToken && decodeJWT(accessToken) !== null;
+    const hasRefresh = !!refreshToken;
+
+    if (!hasValidAccess && !hasRefresh) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
+    // Token expired but refresh exists — let the page load; apiClient will refresh
+    return NextResponse.next();
+  }
+
+  // ── API route protection ───────────────────────────────────────────────────
+  if (!pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
 
   if (publicPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
@@ -101,5 +136,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: [
+    "/api/:path*",
+    "/dashboard/:path*",
+    "/my-shop/:path*",
+    "/shops/:path*",
+    "/certificates/:path*",
+    "/carousel/:path*",
+    "/admins/:path*",
+  ],
 };

@@ -113,7 +113,7 @@ export default function Navbar() {
                     priority
                   />
                 </div>
-                <span className="font-bold text-base text-gray-900">
+                <span className="font-bold text-xs text-gray-900">
                   Traders Federation
                 </span>
               </Link>
@@ -335,6 +335,7 @@ export default function Navbar() {
       </div>
 
       {/* Bottom bar spacer so content isn't hidden behind it on mobile */}
+      <div className="lg:hidden h-2" />
     </>
   );
 }

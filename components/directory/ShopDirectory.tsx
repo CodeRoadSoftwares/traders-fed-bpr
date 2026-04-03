@@ -59,15 +59,18 @@ export default function ShopDirectory() {
   }, [search, page, district, category]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1.5 shadow-sm inline-block px-2 py-0.5 bg-primary-50 rounded-md border border-primary-100">
             Public Directory
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">Shop Directory</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">
+            Shop Directory
+          </h1>
           <p className="text-gray-500 text-sm mt-1.5 font-medium">
-            Browse verified and registered businesses across Bandipora, Jammu & Kashmir
+            Browse verified and registered businesses across Bandipora, Jammu &
+            Kashmir
           </p>
         </div>
       </div>
@@ -89,10 +92,13 @@ export default function ShopDirectory() {
             className="w-full pl-11 pr-4 py-3 bg-gray-50/50 hover:bg-gray-50 border border-transparent focus:border-primary-200 focus:bg-white focus:ring-4 focus:ring-primary-50 rounded-xl text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400 font-medium"
           />
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-2 shrink-0">
           <div className="relative w-full sm:w-48">
-            <Icon d={IC.location} className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Icon
+              d={IC.location}
+              className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            />
             <select
               value={district}
               onChange={(e) => {
@@ -109,12 +115,18 @@ export default function ShopDirectory() {
               ))}
             </select>
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <Icon d={IC.chevronRight} className="w-3.5 h-3.5 rotate-90 opacity-70" />
+              <Icon
+                d={IC.chevronRight}
+                className="w-3.5 h-3.5 rotate-90 opacity-70"
+              />
             </div>
           </div>
-          
+
           <div className="relative w-full sm:w-56">
-            <Icon d={IC.building} className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Icon
+              d={IC.building}
+              className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            />
             <select
               value={category}
               onChange={(e) => {
@@ -131,7 +143,10 @@ export default function ShopDirectory() {
               ))}
             </select>
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <Icon d={IC.chevronRight} className="w-3.5 h-3.5 rotate-90 opacity-70" />
+              <Icon
+                d={IC.chevronRight}
+                className="w-3.5 h-3.5 rotate-90 opacity-70"
+              />
             </div>
           </div>
         </div>
@@ -181,7 +196,8 @@ export default function ShopDirectory() {
               >
                 {/* Photo / Hero Section */}
                 <div className="relative w-full aspect-[16/10] bg-gray-100">
-                  {shop.primaryPhoto || (shop.photos && shop.photos.length > 0) ? (
+                  {shop.primaryPhoto ||
+                  (shop.photos && shop.photos.length > 0) ? (
                     <Image
                       src={shop.primaryPhoto || shop.photos![0]}
                       alt={shop.shopName || shop.user?.name || "Shop"}
@@ -230,7 +246,10 @@ export default function ShopDirectory() {
                     )}
                     {shop.user?.address?.district && (
                       <div className="flex items-center gap-1.5">
-                        <Icon d={IC.location} className="w-3.5 h-3.5 shrink-0" />
+                        <Icon
+                          d={IC.location}
+                          className="w-3.5 h-3.5 shrink-0"
+                        />
                         {shop.user.address.line
                           ? `${shop.user.address.line}, `
                           : ""}

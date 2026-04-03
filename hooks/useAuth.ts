@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/axios/apiClient";
 import { showToast } from "@/lib/toast";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface LoginData {
   email: string;
@@ -23,6 +24,7 @@ interface RegisterData {
 
 export function useAuth() {
   const router = useRouter();
+  const { refetch } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,6 +33,9 @@ export function useAuth() {
     setLoading(true);
     try {
       await apiClient.post("/auth/login", data);
+      // Populate the shared user context before navigating so the
+      // dashboard and navbar render immediately with the correct user.
+      await refetch();
       showToast.success("Login successful!");
       router.push("/dashboard");
     } catch (err) {
@@ -86,6 +91,8 @@ export function useAuth() {
   const logout = async () => {
     try {
       await apiClient.post("/auth/logout");
+      // Clear user from context immediately so navbar updates
+      await refetch();
       showToast.success("Logged out successfully");
       router.push("/login");
     } catch (err) {

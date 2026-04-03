@@ -13,7 +13,13 @@ interface Shop {
   };
 }
 
-export default function CreateFundModal({ onClose }: { onClose: () => void }) {
+export default function CreateFundModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess?: () => void;
+}) {
   const { createFund } = useFunds();
   const [form, setForm] = useState({
     type: "INCOME",
@@ -81,6 +87,7 @@ export default function CreateFundModal({ onClose }: { onClose: () => void }) {
         shopUser:
           form.type === "INCOME" && form.shopUser ? form.shopUser : undefined,
       });
+      onSuccess?.();
       onClose();
     } catch (e) {
       console.error(e);
