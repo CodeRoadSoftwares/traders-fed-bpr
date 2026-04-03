@@ -24,7 +24,6 @@ export async function sendEmail(options: EmailOptions) {
       subject: options.subject,
       html: options.html,
     });
-    console.log("email sent");
     return true;
   } catch (error) {
     console.error("Email send failed:", error);
