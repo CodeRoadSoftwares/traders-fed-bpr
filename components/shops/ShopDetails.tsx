@@ -3,7 +3,14 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import apiClient from "@/lib/axios/apiClient";
 import { Shop } from "@/types";
-import { Icon, IC, StatusBadge, Spinner, Btn } from "@/components/ui";
+import {
+  Icon,
+  IC,
+  StatusBadge,
+  Spinner,
+  Btn,
+  ConfirmDialog,
+} from "@/components/ui";
 import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
 import { showToast } from "@/lib/toast";
@@ -47,6 +54,12 @@ export default function ShopDetails({
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    message: string;
+    action: () => void;
+    danger?: boolean;
+  } | null>(null);
   const { user, loading: userLoading } = useUser();
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
@@ -66,7 +79,7 @@ export default function ShopDetails({
   };
 
   const handleApprove = async () => {
-    if (!shop || !confirm("Approve this shop?")) return;
+    if (!shop) return;
     try {
       await apiClient.post("/certificate/approve", { id: shop._id });
       showToast.success("Shop approved");
@@ -77,7 +90,7 @@ export default function ShopDetails({
   };
 
   const handleReject = async () => {
-    if (!shop || !confirm("Reject this shop?")) return;
+    if (!shop) return;
     try {
       await apiClient.post("/certificate/reject", { id: shop._id });
       showToast.success("Shop rejected");
@@ -88,7 +101,7 @@ export default function ShopDetails({
   };
 
   const handleRenew = async () => {
-    if (!shop || !confirm("Renew certificate for this shop?")) return;
+    if (!shop) return;
     try {
       await apiClient.post("/certificate/renew", { id: shop._id });
       params.then((p) => fetchShop(p.id));
@@ -119,7 +132,8 @@ export default function ShopDetails({
     : null;
 
   // Robust ownership: only when user is loaded AND their ID matches the shop's userId
-  const isOwner = !userLoading && !!user && String(user._id) === String(shop.userId);
+  const isOwner =
+    !userLoading && !!user && String(user._id) === String(shop.userId);
 
   // Collect all photos for the gallery
   const allPhotos: string[] = [];
@@ -142,7 +156,6 @@ export default function ShopDetails({
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-start">
-
         {/* ─── RIGHT COLUMN: Gallery (visually first on mobile, second on desktop) ─── */}
         <div className="lg:col-span-2 lg:order-2 space-y-4">
           {isOwner ? (
@@ -150,13 +163,12 @@ export default function ShopDetails({
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Icon d={IC.image} className="w-5 h-5 text-primary-500" />
-                <p className="text-sm font-bold text-gray-900">
-                  Manage Photos
-                </p>
+                <p className="text-sm font-bold text-gray-900">Manage Photos</p>
               </div>
               <div className="bg-primary-50/50 border border-primary-100 rounded-xl p-3.5 mb-4">
                 <p className="text-xs font-medium text-primary-700 leading-relaxed">
-                  Upload images of your store, inventory, or products. Click any photo to set it as the cover image shown in the directory.
+                  Upload images of your store, inventory, or products. Click any
+                  photo to set it as the cover image shown in the directory.
                 </p>
               </div>
               <ShopPhotos
@@ -184,7 +196,7 @@ export default function ShopDetails({
                       priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
+
                     {/* Zoom hint */}
                     <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 shadow-lg">
                       <Icon d={IC.zoomIn} className="w-3.5 h-3.5" />
@@ -213,7 +225,12 @@ export default function ShopDetails({
                               : "border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100"
                           }`}
                         >
-                          <Image src={p} alt="Thumbnail" fill className="object-cover" />
+                          <Image
+                            src={p}
+                            alt="Thumbnail"
+                            fill
+                            className="object-cover"
+                          />
                         </button>
                       ))}
                     </div>
@@ -224,9 +241,11 @@ export default function ShopDetails({
                   <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
                     <Icon d={IC.image} className="w-8 h-8 text-gray-300" />
                   </div>
-                  <p className="text-sm font-semibold text-gray-700">No photos yet</p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    No photos yet
+                  </p>
                   <p className="text-xs text-gray-400 mt-1 max-w-[220px] leading-relaxed">
-                    This shop hasn't uploaded any storefront photos yet.
+                    This shop hasn&apos;t uploaded any storefront photos yet.
                   </p>
                 </div>
               )}
@@ -248,9 +267,14 @@ export default function ShopDetails({
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                     {shop.shopName || shop.user?.name}
                   </h1>
-                  <p className="text-sm font-medium text-gray-500 mt-0.5">{shop.user?.name}</p>
+                  <p className="text-sm font-medium text-gray-500 mt-0.5">
+                    {shop.user?.name}
+                  </p>
                   <div className="inline-flex items-center gap-1.5 mt-2 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 capitalize">
-                    <Icon d={IC.building} className="w-3.5 h-3.5 text-gray-400" />
+                    <Icon
+                      d={IC.building}
+                      className="w-3.5 h-3.5 text-gray-400"
+                    />
                     {shop.category?.replace(/_/g, " ")}
                   </div>
                 </div>
@@ -259,16 +283,47 @@ export default function ShopDetails({
                 <StatusBadge status={shop.certificateStatus} />
                 {isAdmin && shop.certificateStatus === "PENDING" && (
                   <>
-                    <Btn onClick={handleApprove} variant="primary" className="shadow-sm">
+                    <Btn
+                      onClick={() =>
+                        setConfirmDialog({
+                          title: "Approve Shop",
+                          message: "Approve this shop and issue a certificate?",
+                          action: handleApprove,
+                        })
+                      }
+                      variant="primary"
+                      className="shadow-sm"
+                    >
                       <Icon d={IC.check2} className="w-4 h-4" /> Approve
                     </Btn>
-                    <Btn onClick={handleReject} variant="danger" className="shadow-sm">
+                    <Btn
+                      onClick={() =>
+                        setConfirmDialog({
+                          title: "Reject Shop",
+                          message: "Reject this shop registration?",
+                          action: handleReject,
+                          danger: true,
+                        })
+                      }
+                      variant="danger"
+                      className="shadow-sm"
+                    >
                       <Icon d={IC.x} className="w-4 h-4" /> Reject
                     </Btn>
                   </>
                 )}
                 {isAdmin && shop.certificateStatus === "ACTIVE" && (
-                  <Btn onClick={handleRenew} variant="secondary" className="shadow-sm">
+                  <Btn
+                    onClick={() =>
+                      setConfirmDialog({
+                        title: "Renew Certificate",
+                        message: "Renew the certificate for this shop?",
+                        action: handleRenew,
+                      })
+                    }
+                    variant="secondary"
+                    className="shadow-sm"
+                  >
                     <Icon d={IC.refresh} className="w-4 h-4" /> Renew
                   </Btn>
                 )}
@@ -284,7 +339,8 @@ export default function ShopDetails({
                   className={`flex items-center gap-3 px-5 py-4 rounded-xl text-sm font-medium mb-5 shadow-sm border ${daysLeft <= 7 ? "bg-danger-50 border-danger-200 text-danger-700" : "bg-warning-50 border-warning-200 text-warning-700"}`}
                 >
                   <Icon d={IC.alert} className="w-5 h-5 shrink-0" />
-                  Certificate expires in {daysLeft} day{daysLeft !== 1 ? "s" : ""}.
+                  Certificate expires in {daysLeft} day
+                  {daysLeft !== 1 ? "s" : ""}.
                 </div>
               )}
 
@@ -295,7 +351,11 @@ export default function ShopDetails({
                   value: shop.registrationNumber,
                   icon: IC.building,
                 },
-                { label: "License No.", value: shop.licenseNumber, icon: IC.check },
+                {
+                  label: "License No.",
+                  value: shop.licenseNumber,
+                  icon: IC.check,
+                },
                 {
                   label: "Certificate No.",
                   value: shop.certificateNumber,
@@ -370,7 +430,11 @@ export default function ShopDetails({
                   value: String(shop.user?.phone || "—"),
                   icon: IC.phone,
                 },
-                { label: "Email", value: shop.user?.email || "—", icon: IC.mail },
+                {
+                  label: "Email",
+                  value: shop.user?.email || "—",
+                  icon: IC.mail,
+                },
                 {
                   label: "Address",
                   value:
@@ -384,7 +448,10 @@ export default function ShopDetails({
                   icon: IC.location,
                 },
               ].map((row) => (
-                <div key={row.label} className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div
+                  key={row.label}
+                  className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100"
+                >
                   <div className="flex items-center gap-2">
                     <Icon d={row.icon} className="w-4 h-4 text-gray-400" />
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -404,6 +471,20 @@ export default function ShopDetails({
       {/* Lightbox overlay */}
       {lightboxSrc && (
         <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
+
+      {confirmDialog && (
+        <ConfirmDialog
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          danger={confirmDialog.danger}
+          confirmLabel={confirmDialog.title.split(" ")[0]}
+          onConfirm={() => {
+            confirmDialog.action();
+            setConfirmDialog(null);
+          }}
+          onCancel={() => setConfirmDialog(null)}
+        />
       )}
     </div>
   );

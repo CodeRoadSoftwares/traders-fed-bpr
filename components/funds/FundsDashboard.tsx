@@ -11,72 +11,10 @@ import {
   Pagination,
   Empty,
   Btn,
+  ConfirmDialog,
 } from "@/components/ui";
 import apiClient from "@/lib/axios/apiClient";
 import { showToast } from "@/lib/toast";
-
-function SummaryCards({
-  income,
-  expense,
-  loading,
-}: {
-  income: number;
-  expense: number;
-  loading: boolean;
-}) {
-  const balance = income - expense;
-  const items = [
-    {
-      label: "Total Income",
-      value: income,
-      color: "text-primary-600",
-      bg: "bg-primary-50",
-      border: "border-primary-100",
-      icon: IC.fund,
-    },
-    {
-      label: "Total Expense",
-      value: expense,
-      color: "text-danger-600",
-      bg: "bg-danger-50",
-      border: "border-danger-100",
-      icon: IC.fund,
-    },
-    {
-      label: "Net Balance",
-      value: balance,
-      color: balance >= 0 ? "text-primary-600" : "text-danger-600",
-      bg: balance >= 0 ? "bg-primary-50" : "bg-danger-50",
-      border: balance >= 0 ? "border-primary-100" : "border-danger-100",
-      icon: IC.fund,
-    },
-  ];
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {items.map((s) => (
-        <div
-          key={s.label}
-          className={`${s.bg} border ${s.border} rounded-xl p-5`}
-        >
-          <div
-            className={`w-9 h-9 bg-white rounded-lg flex items-center justify-center mb-3 ${s.color}`}
-          >
-            <Icon d={s.icon} className="w-4.5 h-4.5" />
-          </div>
-          <p className="text-xs text-gray-500 mb-1">{s.label}</p>
-          {loading ? (
-            <Sk className="h-7 w-24" />
-          ) : (
-            <p className={`text-2xl font-bold ${s.color}`}>
-              {balance < 0 && s.label === "Net Balance" ? "−" : ""}₹
-              {Math.abs(s.value).toLocaleString("en-IN")}
-            </p>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function FundsDashboard() {
   const { user } = useUser();
@@ -87,9 +25,10 @@ export default function FundsDashboard() {
   const [search, setSearch] = useState("");
   const [sortAmount, setSortAmount] = useState<"" | "asc" | "desc">("");
   const [showModal, setShowModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [myContributions, setMyContributions] = useState<{
     totalAmount: number;
-    contributions: typeof funds;
+    contributions: unknown[];
   } | null>(null);
   const [contributionsLoading, setContributionsLoading] = useState(false);
   const { funds, pagination, loading, deleteFund, refetch } = useFunds({
@@ -99,22 +38,22 @@ export default function FundsDashboard() {
   });
 
   useEffect(() => {
-    if (isShop) {
-      fetchMyContributions();
-    }
-  }, [isShop]);
+    if (!isShop) return;
 
-  const fetchMyContributions = async () => {
-    setContributionsLoading(true);
-    try {
-      const res = await apiClient.get("/fund/my-contributions");
-      setMyContributions(res.data);
-    } catch (error) {
-      console.error("Failed to fetch contributions", error);
-    } finally {
-      setContributionsLoading(false);
-    }
-  };
+    const fetchContributions = async () => {
+      try {
+        setContributionsLoading(true);
+        const res = await apiClient.get("/fund/my-contributions");
+        setMyContributions(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setContributionsLoading(false);
+      }
+    };
+
+    fetchContributions();
+  }, [isShop]);
 
   const filtered = funds.filter((f) => {
     if (!search) return true;
@@ -137,6 +76,7 @@ export default function FundsDashboard() {
   const expense = funds
     .filter((f) => f.type === "EXPENSE")
     .reduce((s, f) => s + f.amount, 0);
+  const balance = income - expense;
 
   const handleReport = async () => {
     try {
@@ -157,7 +97,6 @@ export default function FundsDashboard() {
 
   const handleCsvExport = async () => {
     try {
-      // Fetch all entries for current type filter (no pagination)
       const r = await apiClient.get("/fund/get", {
         params: { type: type || undefined, limit: 10000, page: 1 },
       });
@@ -186,151 +125,174 @@ export default function FundsDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-        <div>
-          <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">
-            Transparency
-          </p>
-          <h1 className="text-2xl font-bold text-gray-900">Funds Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {isAdmin
-              ? "Manage income and expense entries, generate reports"
-              : "Complete record of federation income and expenditure — updated in real time"}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Btn variant="secondary" onClick={handleCsvExport}>
-            <Icon d={IC.download} className="w-4 h-4" /> CSV Export
-          </Btn>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      {/* Compact header */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Funds</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCsvExport}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Export CSV"
+          >
+            <Icon d={IC.download} className="w-4 h-4" />
+          </button>
           {isAdmin && (
             <>
-              <Btn variant="secondary" onClick={handleReport}>
-                <Icon d={IC.download} className="w-4 h-4" /> PDF Report
-              </Btn>
-              <Btn onClick={() => setShowModal(true)}>
-                <Icon d={IC.plus} className="w-4 h-4" /> Add Entry
+              <button
+                onClick={handleReport}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="PDF Report"
+              >
+                <Icon d={IC.fileText} className="w-4 h-4" />
+              </button>
+              <Btn
+                onClick={() => setShowModal(true)}
+                className="!py-2 !px-3 text-sm"
+              >
+                <Icon d={IC.plus} className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Entry</span>
               </Btn>
             </>
           )}
         </div>
       </div>
 
-      {!user && (
-        <div className="flex items-start gap-3 px-4 py-3.5 bg-primary-50 border border-primary-100 rounded-xl text-sm text-primary-700 mb-6">
-          <Icon d={IC.shield} className="w-4 h-4 shrink-0 mt-0.5" />
-          <p>
-            This is a public transparency record. All income and expenses of the
-            Traders Federation are listed here for member and public
-            accountability.
-          </p>
-        </div>
-      )}
-
-      <div className="mb-6">
-        <SummaryCards income={income} expense={expense} loading={loading} />
+      {/* Stats strip — horizontal scroll on mobile */}
+      <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 scrollbar-none mb-4">
+        {[
+          {
+            label: "Income",
+            value: income,
+            color: "text-primary-600",
+            bg: "bg-primary-50",
+            border: "border-primary-100",
+          },
+          {
+            label: "Expense",
+            value: expense,
+            color: "text-danger-600",
+            bg: "bg-danger-50",
+            border: "border-danger-100",
+          },
+          {
+            label: "Balance",
+            value: balance,
+            color: balance >= 0 ? "text-primary-600" : "text-danger-600",
+            bg: balance >= 0 ? "bg-primary-50" : "bg-danger-50",
+            border: balance >= 0 ? "border-primary-100" : "border-danger-100",
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className={`${s.bg} border ${s.border} rounded-xl p-4 shrink-0 w-40 sm:w-auto`}
+          >
+            <p className="text-xs text-gray-500 mb-1">{s.label}</p>
+            {loading ? (
+              <Sk className="h-6 w-20" />
+            ) : (
+              <p className={`text-xl font-bold ${s.color} tabular-nums`}>
+                {balance < 0 && s.label === "Balance" ? "−" : ""}₹
+                {Math.abs(s.value).toLocaleString("en-IN")}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
 
+      {/* My contributions (shop users) */}
       {isShop && (
-        <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl border border-primary-200 p-6 mb-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary-600 shrink-0">
-              <Icon d={IC.fund} className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                Your Contributions
-              </h3>
-              <p className="text-sm text-gray-600 mb-3">
-                Total amount you have contributed to the federation
+        <div className="flex items-center gap-3 bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 mb-4">
+          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-primary-600 shrink-0">
+            <Icon d={IC.fund} className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Your Contributions</p>
+            {contributionsLoading ? (
+              <Sk className="h-5 w-20 mt-1" />
+            ) : (
+              <p className="text-lg font-bold text-primary-600">
+                ₹{myContributions?.totalAmount.toLocaleString("en-IN") || 0}
               </p>
-              {contributionsLoading ? (
-                <Sk className="h-8 w-32" />
-              ) : (
-                <p className="text-3xl font-bold text-primary-600">
-                  ₹{myContributions?.totalAmount.toLocaleString("en-IN") || 0}
-                </p>
-              )}
-              {myContributions && myContributions.contributions.length > 0 && (
-                <p className="text-xs text-gray-500 mt-2">
-                  {myContributions.contributions.length} contribution
-                  {myContributions.contributions.length > 1 ? "s" : ""} recorded
-                </p>
-              )}
-            </div>
+            )}
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1 min-w-0">
+      {/* Public notice */}
+      {!user && (
+        <div className="flex items-start gap-2 px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl text-xs text-primary-700 mb-4">
+          <Icon d={IC.shield} className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          Public transparency record — all federation income and expenses are
+          listed here.
+        </div>
+      )}
+
+      {/* Search + filters row */}
+      <div className="flex gap-2 mb-2">
+        <div className="relative flex-1">
           <Icon
             d={IC.search}
             className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           <input
             type="text"
-            placeholder="Search category or description…"
+            placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700 placeholder-gray-400"
+            className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 text-gray-700 placeholder-gray-400"
           />
         </div>
-
-        {/* Type filter */}
-        <div className="flex gap-2 shrink-0">
-          {(
-            [
-              ["", "All"],
-              ["INCOME", "Income"],
-              ["EXPENSE", "Expense"],
-            ] as const
-          ).map(([val, label]) => (
-            <button
-              key={val}
-              onClick={() => {
-                setType(val);
-                setPage(1);
-              }}
-              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${type === val ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Sort by amount */}
         <select
           value={sortAmount}
           onChange={(e) => setSortAmount(e.target.value as "" | "asc" | "desc")}
-          className="shrink-0 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white text-gray-700"
+          className="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 text-gray-700"
         >
-          <option value="">Sort: Date</option>
-          <option value="desc">Amount: High → Low</option>
-          <option value="asc">Amount: Low → High</option>
+          <option value="">Date</option>
+          <option value="desc">High → Low</option>
+          <option value="asc">Low → High</option>
         </select>
+      </div>
 
+      {/* Type filter chips */}
+      <div className="flex gap-2 mb-3">
+        {(
+          [
+            ["", "All"],
+            ["INCOME", "Income"],
+            ["EXPENSE", "Expense"],
+          ] as const
+        ).map(([val, label]) => (
+          <button
+            key={val}
+            onClick={() => {
+              setType(val);
+              setPage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors ${type === val ? "bg-primary-600 text-white border-primary-600" : "bg-white text-gray-600 border-gray-200"}`}
+          >
+            {label}
+          </button>
+        ))}
         {pagination && !loading && (
-          <p className="text-xs text-gray-400 shrink-0">
-            {search ? `${sorted.length} of ` : ""}
+          <span className="ml-auto text-xs text-gray-400 self-center">
             {pagination.total} entries
-          </p>
+          </span>
         )}
       </div>
 
+      {/* Table */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         {loading ? (
-          <div className="p-5 space-y-3">
+          <div className="p-4 space-y-3">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center gap-4">
-                <Sk className="h-6 w-16 rounded-full" />
+                <Sk className="h-5 w-14 rounded-full" />
                 <div className="flex-1 space-y-1.5">
                   <Sk className="h-3.5 w-1/3" />
                   <Sk className="h-3 w-1/4" />
                 </div>
-                <Sk className="h-4 w-24" />
-                {isAdmin && <Sk className="h-7 w-7 rounded-lg" />}
+                <Sk className="h-4 w-20" />
               </div>
             ))}
           </div>
@@ -372,9 +334,9 @@ export default function FundsDashboard() {
                           s === "desc" ? "asc" : s === "asc" ? "" : "desc",
                         )
                       }
-                      className="flex items-center gap-1 hover:text-gray-800 transition-colors"
+                      className="flex items-center gap-1 hover:text-gray-800"
                     >
-                      Amount
+                      Amount{" "}
                       <span className="text-gray-300">
                         {sortAmount === "desc"
                           ? "↓"
@@ -411,7 +373,7 @@ export default function FundsDashboard() {
                       typeof fund.shopUser === "object" &&
                       "shopName" in fund.shopUser ? (
                         <span className="text-primary-600 font-medium">
-                          {fund.shopUser.shopName}
+                          {(fund.shopUser as { shopName: string }).shopName}
                         </span>
                       ) : (
                         <span className="text-gray-400">—</span>
@@ -429,10 +391,7 @@ export default function FundsDashboard() {
                     {isAdmin && (
                       <td className="px-4 py-3.5">
                         <button
-                          onClick={() => {
-                            if (confirm("Delete this entry?"))
-                              deleteFund(fund._id);
-                          }}
+                          onClick={() => setConfirmDelete(fund._id)}
                           className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-danger-600 hover:bg-danger-50 transition-colors"
                         >
                           <Icon d={IC.trash} className="w-3.5 h-3.5" />
@@ -451,17 +410,24 @@ export default function FundsDashboard() {
         <Pagination page={page} pages={pagination.pages} onPage={setPage} />
       )}
 
-      {!user && (
-        <p className="text-center text-xs text-gray-400 mt-8">
-          Data is maintained by federation administrators. For queries, contact
-          your local federation office.
-        </p>
-      )}
-
       {showModal && (
         <CreateFundModal
           onClose={() => setShowModal(false)}
           onSuccess={refetch}
+        />
+      )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title="Delete Entry"
+          message="Delete this fund entry? This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => {
+            deleteFund(confirmDelete);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
         />
       )}
     </div>

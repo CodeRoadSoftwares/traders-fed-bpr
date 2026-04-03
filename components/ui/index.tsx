@@ -2,6 +2,7 @@
 // Shared UI primitives used across all pages
 
 import { ReactNode } from "react";
+export { default as ConfirmDialog } from "./ConfirmDialog";
 
 // ─── Icon ─────────────────────────────────────────────────────────────────────
 export function Icon({

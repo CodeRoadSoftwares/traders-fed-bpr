@@ -14,12 +14,14 @@ import {
   Pagination,
   Empty,
   Btn,
+  ConfirmDialog,
 } from "@/components/ui";
 
 export default function NoticesList() {
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const { notices, pagination, loading, deleteNotice, refetch } = useNotices({
     page,
@@ -134,13 +136,7 @@ export default function NoticesList() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (
-                            confirm(
-                              "Are you sure you want to completely delete this notice? This action cannot be undone.",
-                            )
-                          ) {
-                            deleteNotice(notice._id);
-                          }
+                          setConfirmDelete(notice._id);
                         }}
                         className="p-1.5 text-gray-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors border border-transparent hover:border-danger-100"
                         title="Delete Notice"
@@ -207,7 +203,6 @@ export default function NoticesList() {
         </div>
       )}
 
-      {/* Modals */}
       {showModal && (
         <CreateNoticeModal
           onClose={() => setShowModal(false)}
@@ -219,6 +214,20 @@ export default function NoticesList() {
         <NoticeDetailModal
           notice={selectedNotice}
           onClose={() => setSelectedNotice(null)}
+        />
+      )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title="Delete Notice"
+          message="Are you sure you want to delete this notice? This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => {
+            deleteNotice(confirmDelete);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
         />
       )}
     </div>

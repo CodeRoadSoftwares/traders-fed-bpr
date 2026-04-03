@@ -10,6 +10,7 @@ import {
   Pagination,
   Empty,
   Btn,
+  ConfirmDialog,
 } from "@/components/ui";
 import apiClient from "@/lib/axios/apiClient";
 import { showToast } from "@/lib/toast";
@@ -18,6 +19,7 @@ export default function FundsList() {
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const { funds, pagination, loading, deleteFund } = useFunds({ page, type });
 
   const handleReport = async () => {
@@ -187,10 +189,7 @@ export default function FundsList() {
                     </td>
                     <td className="px-4 py-3.5">
                       <button
-                        onClick={() => {
-                          if (confirm("Delete this entry?"))
-                            deleteFund(fund._id);
-                        }}
+                        onClick={() => setConfirmDelete(fund._id)}
                         className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-danger-600 hover:bg-danger-50 transition-colors"
                       >
                         <Icon d={IC.trash} className="w-3.5 h-3.5" />
@@ -208,6 +207,20 @@ export default function FundsList() {
         <Pagination page={page} pages={pagination.pages} onPage={setPage} />
       )}
       {showModal && <CreateFundModal onClose={() => setShowModal(false)} />}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title="Delete Entry"
+          message="Delete this fund entry? This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => {
+            deleteFund(confirmDelete);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   );
 }

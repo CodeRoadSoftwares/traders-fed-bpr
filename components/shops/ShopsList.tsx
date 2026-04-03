@@ -2,12 +2,25 @@
 import { useState } from "react";
 import { useShops } from "@/hooks/useShops";
 import Link from "next/link";
-import { Icon, IC, Sk, StatusBadge, Pagination, Empty } from "@/components/ui";
+import {
+  Icon,
+  IC,
+  Sk,
+  StatusBadge,
+  Pagination,
+  Empty,
+  ConfirmDialog,
+} from "@/components/ui";
 
 export default function ShopsList() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("PENDING");
   const [search, setSearch] = useState("");
+  const [confirm, setConfirm] = useState<{
+    action: () => void;
+    title: string;
+    message: string;
+  } | null>(null);
   const { shops, pagination, loading, approveShop, rejectShop } = useShops({
     page,
     status,
@@ -22,7 +35,9 @@ export default function ShopsList() {
           <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1.5 shadow-sm inline-block px-2 py-0.5 bg-primary-50 rounded-md border border-primary-100">
             Administration
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">Shops Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">
+            Shops Management
+          </h1>
           <p className="text-gray-500 text-sm mt-1.5 font-medium">
             Review, approve, and manage shop registrations
           </p>
@@ -44,9 +59,12 @@ export default function ShopsList() {
             className="w-full pl-11 pr-4 py-3 bg-gray-50/50 hover:bg-gray-50 border border-transparent focus:border-primary-200 focus:bg-white focus:ring-4 focus:ring-primary-50 rounded-xl text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400 font-medium"
           />
         </div>
-        
+
         <div className="relative w-full sm:w-48 shrink-0">
-          <Icon d={IC.clock} className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Icon
+            d={IC.clock}
+            className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -59,7 +77,10 @@ export default function ShopsList() {
             <option value="EXPIRED">Expired</option>
           </select>
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-            <Icon d={IC.chevronRight} className="w-3.5 h-3.5 rotate-90 opacity-70" />
+            <Icon
+              d={IC.chevronRight}
+              className="w-3.5 h-3.5 rotate-90 opacity-70"
+            />
           </div>
         </div>
       </div>
@@ -149,19 +170,25 @@ export default function ShopsList() {
                           <>
                             <span className="text-gray-200">|</span>
                             <button
-                              onClick={() => {
-                                if (confirm("Approve this shop?"))
-                                  approveShop(shop._id);
-                              }}
+                              onClick={() =>
+                                setConfirm({
+                                  title: "Approve Shop",
+                                  message: "Approve this shop registration?",
+                                  action: () => approveShop(shop._id),
+                                })
+                              }
                               className="text-xs px-2 py-1 bg-primary-50 text-primary-700 hover:bg-primary-100 rounded font-medium transition-colors"
                             >
                               Approve
                             </button>
                             <button
-                              onClick={() => {
-                                if (confirm("Reject this shop?"))
-                                  rejectShop(shop._id);
-                              }}
+                              onClick={() =>
+                                setConfirm({
+                                  title: "Reject Shop",
+                                  message: "Reject this shop registration?",
+                                  action: () => rejectShop(shop._id),
+                                })
+                              }
                               className="text-xs px-2 py-1 bg-danger-50 text-danger-700 hover:bg-danger-100 rounded font-medium transition-colors"
                             >
                               Reject
@@ -180,6 +207,20 @@ export default function ShopsList() {
 
       {pagination && (
         <Pagination page={page} pages={pagination.pages} onPage={setPage} />
+      )}
+
+      {confirm && (
+        <ConfirmDialog
+          title={confirm.title}
+          message={confirm.message}
+          danger={confirm.title.toLowerCase().includes("reject")}
+          confirmLabel={confirm.title.split(" ")[0]}
+          onConfirm={() => {
+            confirm.action();
+            setConfirm(null);
+          }}
+          onCancel={() => setConfirm(null)}
+        />
       )}
     </div>
   );

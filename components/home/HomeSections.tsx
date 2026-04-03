@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Shop, Notice, NoticeAttachment } from "@/types";
+import { Shop, Notice } from "@/types";
 
 function Icon({ d, className = "w-5 h-5" }: { d: string; className?: string }) {
   return (
@@ -41,7 +41,8 @@ const ICONS = {
   download: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4",
   externalLink:
     "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14",
-  zoomIn: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7",
+  zoomIn:
+    "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7",
   image:
     "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
   fileText:
@@ -158,13 +159,12 @@ function NoticeDetailModal({
                   month: "long",
                   year: "numeric",
                 })}
-                {notice.createdBy &&
-                  typeof notice.createdBy === "object" && (
-                    <>
-                      <span className="text-gray-200 mx-0.5">·</span>
-                      <span>{notice.createdBy.name}</span>
-                    </>
-                  )}
+                {notice.createdBy && typeof notice.createdBy === "object" && (
+                  <>
+                    <span className="text-gray-200 mx-0.5">·</span>
+                    <span>{notice.createdBy.name}</span>
+                  </>
+                )}
               </div>
             </div>
             <button
@@ -192,9 +192,7 @@ function NoticeDetailModal({
                 </div>
                 <div
                   className={`grid gap-2.5 ${
-                    images.length === 1
-                      ? "grid-cols-1"
-                      : "grid-cols-2"
+                    images.length === 1 ? "grid-cols-1" : "grid-cols-2"
                   }`}
                 >
                   {images.map((a) => (
@@ -258,7 +256,10 @@ function NoticeDetailModal({
                       className="flex items-center gap-3 px-3 sm:px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 hover:border-gray-200 transition-all"
                     >
                       <div className="w-9 h-9 sm:w-10 sm:h-10 bg-danger-50 rounded-lg flex items-center justify-center shrink-0">
-                        <Icon d={ICONS.fileText} className="w-4 h-4 sm:w-5 sm:h-5 text-danger-500" />
+                        <Icon
+                          d={ICONS.fileText}
+                          className="w-4 h-4 sm:w-5 sm:h-5 text-danger-500"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 truncate">
@@ -426,7 +427,9 @@ function NoticeCard({
 function ShopCard({ shop }: { shop: Shop }) {
   const initials = shop.user?.name?.slice(0, 2).toUpperCase() || "TF";
   const color = colors[shop._id.charCodeAt(0) % colors.length];
-  const photoUrl = shop.primaryPhoto || (shop.photos && shop.photos.length > 0 ? shop.photos[0] : null);
+  const photoUrl =
+    shop.primaryPhoto ||
+    (shop.photos && shop.photos.length > 0 ? shop.photos[0] : null);
 
   return (
     <Link
@@ -486,9 +489,7 @@ function ShopCard({ shop }: { shop: Shop }) {
             <div className="flex items-center gap-1.5">
               <Icon d={ICONS.location} className="w-3 h-3 shrink-0" />
               <span className="truncate">
-                {shop.user.address.line
-                  ? `${shop.user.address.line}, `
-                  : ""}
+                {shop.user.address.line ? `${shop.user.address.line}, ` : ""}
                 {shop.user.address.district}
               </span>
             </div>
@@ -742,7 +743,7 @@ export function HowItWorks() {
     },
     {
       step: "02",
-      title: "Submit for Review",
+      title: "Review",
       desc: "Your registration is reviewed by a federation administrator who verifies your documents.",
     },
     {

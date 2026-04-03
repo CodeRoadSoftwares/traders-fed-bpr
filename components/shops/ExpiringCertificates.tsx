@@ -1,11 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useCertificates } from "@/hooks/useCertificates";
-import { Icon, IC, Sk, Empty } from "@/components/ui";
+import { Icon, IC, Sk, Empty, ConfirmDialog } from "@/components/ui";
 import { showToast } from "@/lib/toast";
 
 export default function ExpiringCertificates() {
   const [days, setDays] = useState(30);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const {
     expiringShops,
     loading,
@@ -18,7 +22,6 @@ export default function ExpiringCertificates() {
   }, [days, fetchExpiringCertificates]);
 
   const handleRenew = async (id: string, name: string) => {
-    if (!confirm(`Renew certificate for ${name}?`)) return;
     try {
       await renewCertificate(id);
       fetchExpiringCertificates(days);
@@ -151,7 +154,10 @@ export default function ExpiringCertificates() {
                       <td className="px-4 py-3.5">
                         <button
                           onClick={() =>
-                            handleRenew(shop._id, shop.user?.name || "")
+                            setConfirmDialog({
+                              id: shop._id,
+                              name: shop.user?.name || "",
+                            })
                           }
                           className="inline-flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 font-medium"
                         >
@@ -166,6 +172,18 @@ export default function ExpiringCertificates() {
           </div>
         )}
       </div>
+      {confirmDialog && (
+        <ConfirmDialog
+          title="Renew Certificate"
+          message={`Renew certificate for ${confirmDialog.name}?`}
+          confirmLabel="Renew"
+          onConfirm={() => {
+            handleRenew(confirmDialog.id, confirmDialog.name);
+            setConfirmDialog(null);
+          }}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
 }

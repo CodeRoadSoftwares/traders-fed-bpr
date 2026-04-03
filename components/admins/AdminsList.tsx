@@ -10,11 +10,16 @@ import {
   Pagination,
   Empty,
   Btn,
+  ConfirmDialog,
 } from "@/components/ui";
 
 export default function AdminsList() {
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const { admins, pagination, loading, deleteAdmin } = useAdmins(page);
 
   return (
@@ -94,10 +99,12 @@ export default function AdminsList() {
                     <td className="px-4 py-3.5">
                       {admin.role !== "SUPER_ADMIN" && (
                         <button
-                          onClick={() => {
-                            if (confirm(`Remove ${admin.name} as admin?`))
-                              deleteAdmin(admin._id);
-                          }}
+                          onClick={() =>
+                            setConfirmDialog({
+                              id: admin._id,
+                              name: admin.name,
+                            })
+                          }
                           className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-danger-600 hover:bg-danger-50 transition-colors"
                         >
                           <Icon d={IC.trash} className="w-3.5 h-3.5" />
@@ -116,6 +123,20 @@ export default function AdminsList() {
         <Pagination page={page} pages={pagination.pages} onPage={setPage} />
       )}
       {showModal && <CreateAdminModal onClose={() => setShowModal(false)} />}
+
+      {confirmDialog && (
+        <ConfirmDialog
+          title="Remove Admin"
+          message={`Remove ${confirmDialog.name} as an administrator? This cannot be undone.`}
+          confirmLabel="Remove"
+          danger
+          onConfirm={() => {
+            deleteAdmin(confirmDialog.id);
+            setConfirmDialog(null);
+          }}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
 }

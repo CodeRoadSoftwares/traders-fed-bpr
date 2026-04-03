@@ -59,117 +59,89 @@ export default function ShopDirectory() {
   }, [search, page, district, category]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div>
-          <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1.5 shadow-sm inline-block px-2 py-0.5 bg-primary-50 rounded-md border border-primary-100">
-            Public Directory
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-1">
-            Shop Directory
-          </h1>
-          <p className="text-gray-500 text-sm mt-1.5 font-medium">
-            Browse verified and registered businesses across Bandipora, Jammu &
-            Kashmir
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 mb-8 flex flex-col lg:flex-row gap-2">
-        <div className="relative flex-1">
-          <Icon
-            d={IC.search}
-            className="w-4.5 h-4.5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"
-          />
-          <input
-            type="text"
-            placeholder="Search by shop name, category, or owner..."
-            value={search}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      {/* Compact header + search row */}
+      <div className="mb-3">
+        <h1 className="text-lg sm:text-2xl font-bold text-gray-900 mb-3">
+          Shop Directory
+        </h1>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Icon
+              d={IC.search}
+              className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search shops…"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-800 placeholder:text-gray-400"
+            />
+          </div>
+          <select
+            value={district}
             onChange={(e) => {
-              setSearch(e.target.value);
+              setDistrict(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-11 pr-4 py-3 bg-gray-50/50 hover:bg-gray-50 border border-transparent focus:border-primary-200 focus:bg-white focus:ring-4 focus:ring-primary-50 rounded-xl text-sm transition-all outline-none text-gray-800 placeholder:text-gray-400 font-medium"
-          />
+            className="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 text-gray-700 max-w-[130px] sm:max-w-none"
+          >
+            <option value="">District</option>
+            {Object.values(JKDistrict).map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-          <div className="relative w-full sm:w-48">
-            <Icon
-              d={IC.location}
-              className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-            />
-            <select
-              value={district}
-              onChange={(e) => {
-                setDistrict(e.target.value);
+        {/* Category chips — horizontal scroll */}
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => {
+              setCategory("");
+              setPage(1);
+            }}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${!category ? "bg-primary-600 text-white border-primary-600" : "bg-white text-gray-600 border-gray-200"}`}
+          >
+            All
+          </button>
+          {Object.values(ShopCategory).map((c) => (
+            <button
+              key={c}
+              onClick={() => {
+                setCategory(c);
                 setPage(1);
               }}
-              className="w-full pl-10 pr-8 py-3 bg-gray-50/50 hover:bg-gray-50 border border-transparent focus:border-primary-200 focus:bg-white focus:ring-4 focus:ring-primary-50 rounded-xl text-sm transition-all outline-none appearance-none cursor-pointer text-gray-700 font-medium"
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${category === c ? "bg-primary-600 text-white border-primary-600" : "bg-white text-gray-600 border-gray-200"}`}
             >
-              <option value="">All Districts</option>
-              {Object.values(JKDistrict).map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <Icon
-                d={IC.chevronRight}
-                className="w-3.5 h-3.5 rotate-90 opacity-70"
-              />
-            </div>
-          </div>
-
-          <div className="relative w-full sm:w-56">
-            <Icon
-              d={IC.building}
-              className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-            />
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-10 pr-8 py-3 bg-gray-50/50 hover:bg-gray-50 border border-transparent focus:border-primary-200 focus:bg-white focus:ring-4 focus:ring-primary-50 rounded-xl text-sm transition-all outline-none appearance-none cursor-pointer text-gray-700 font-medium"
-            >
-              <option value="">All Categories</option>
-              {Object.values(ShopCategory).map((c) => (
-                <option key={c} value={c}>
-                  {c.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <Icon
-                d={IC.chevronRight}
-                className="w-3.5 h-3.5 rotate-90 opacity-70"
-              />
-            </div>
-          </div>
+              {c.replace(/_/g, " ")}
+            </button>
+          ))}
         </div>
+
+        {!loading && (
+          <p className="text-xs text-gray-400 mt-2">{total} shops found</p>
+        )}
       </div>
 
-      {!loading && (
-        <p className="text-xs text-gray-500 mb-4">{total} shops found</p>
-      )}
-
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {[...Array(12)].map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-gray-100 p-5 space-y-3"
+              className="bg-white rounded-xl border border-gray-100 overflow-hidden"
             >
-              <div className="flex justify-between">
-                <Sk className="h-11 w-11 rounded-xl" />
-                <Sk className="h-5 w-16 rounded-full" />
+              <Sk className="h-28 sm:h-36 w-full" />
+              <div className="p-3 space-y-2">
+                <Sk className="h-4 w-2/3" />
+                <Sk className="h-3 w-1/2" />
+                <Sk className="h-3 w-3/4" />
               </div>
-              <Sk className="h-4 w-2/3" />
-              <Sk className="h-3 w-1/2" />
-              <Sk className="h-3 w-3/4" />
             </div>
           ))}
         </div>
@@ -187,80 +159,56 @@ export default function ShopDirectory() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {shops.map((shop) => (
               <Link
                 key={shop._id}
                 href={`/shops/${shop._id}`}
                 className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary-100 transition-all group flex flex-col"
               >
-                {/* Photo / Hero Section */}
                 <div className="relative w-full aspect-[16/10] bg-gray-100">
-                  {shop.primaryPhoto ||
-                  (shop.photos && shop.photos.length > 0) ? (
+                  {shop.primaryPhoto || shop.photos?.[0] ? (
                     <Image
                       src={shop.primaryPhoto || shop.photos![0]}
                       alt={shop.shopName || shop.user?.name || "Shop"}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   ) : (
                     <div
                       className={`w-full h-full bg-gradient-to-br ${colors[shop._id.charCodeAt(0) % colors.length]} flex items-center justify-center`}
                     >
-                      <span className="text-white text-3xl font-bold opacity-50">
+                      <span className="text-white text-2xl font-bold opacity-50">
                         {shop.user?.name?.slice(0, 2).toUpperCase() || "TF"}
                       </span>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <div className="absolute top-2.5 right-2.5">
+                  <div className="absolute top-2 right-2">
                     <StatusBadge status="ACTIVE" />
                   </div>
                   {shop.shopName && (
-                    <div className="absolute bottom-2.5 left-3 right-3">
-                      <p className="text-white text-sm font-bold truncate drop-shadow-sm">
-                        {shop.shopName}
-                      </p>
-                    </div>
+                    <p className="absolute bottom-2 left-2.5 right-2.5 text-white text-xs font-bold truncate drop-shadow-sm">
+                      {shop.shopName}
+                    </p>
                   )}
                 </div>
-
-                {/* Details */}
-                <div className="p-4 flex-1 flex flex-col gap-2.5">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm group-hover:text-primary-600 transition-colors">
-                      {shop.user?.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-0.5 capitalize">
-                      {shop.category?.replace(/_/g, " ")}
-                    </p>
-                  </div>
-                  <div className="space-y-1.5 text-xs text-gray-500 mt-auto">
-                    {shop.user?.phone && (
-                      <div className="flex items-center gap-1.5">
-                        <Icon d={IC.phone} className="w-3.5 h-3.5 shrink-0" />
-                        {shop.user.phone}
-                      </div>
-                    )}
-                    {shop.user?.address?.district && (
-                      <div className="flex items-center gap-1.5">
-                        <Icon
-                          d={IC.location}
-                          className="w-3.5 h-3.5 shrink-0"
-                        />
-                        {shop.user.address.line
-                          ? `${shop.user.address.line}, `
-                          : ""}
+                <div className="p-3 flex-1 flex flex-col gap-1.5">
+                  <p className="font-semibold text-gray-900 text-sm group-hover:text-primary-600 transition-colors truncate">
+                    {shop.user?.name}
+                  </p>
+                  <p className="text-xs text-gray-400 capitalize truncate">
+                    {shop.category?.replace(/_/g, " ")}
+                  </p>
+                  {shop.user?.address?.district && (
+                    <div className="flex items-center gap-1 text-xs text-gray-400 mt-auto">
+                      <Icon d={IC.location} className="w-3 h-3 shrink-0" />
+                      <span className="truncate">
                         {shop.user.address.district}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 font-mono">
-                      <Icon d={IC.check} className="w-3.5 h-3.5 shrink-0" />
-                      {shop.certificateNumber}
+                      </span>
                     </div>
-                  </div>
+                  )}
                 </div>
               </Link>
             ))}
