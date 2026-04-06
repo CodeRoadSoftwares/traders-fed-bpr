@@ -8,6 +8,17 @@ export const shopSchema = z.object({
   category: z.enum(ShopCategory),
   primaryPhoto: z.string().url(),
   photos: z.array(z.string()).optional(),
+  shopkeeperPhoto: z.string().url().optional(),
+  documents: z
+    .object({
+      aadhar: z.string().url().optional(),
+      pan: z.string().url().optional(),
+      photograph: z.string().url().optional(),
+      municipalityCertificate: z.string().url().optional(),
+      rentOrElectricityBill: z.string().url().optional(),
+      otherLicenses: z.array(z.string().url()).optional(),
+    })
+    .optional(),
   location: z
     .object({
       latitude: z.number(),

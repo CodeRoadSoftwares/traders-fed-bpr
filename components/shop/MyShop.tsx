@@ -4,6 +4,7 @@ import apiClient from "@/lib/axios/apiClient";
 import { Shop } from "@/types";
 import RegisterShopForm from "./RegisterShopForm";
 import ShopPhotos from "./ShopPhotos";
+import ShopDocuments from "./ShopDocuments";
 import CertificatePreview from "./CertificatePreview";
 import { Icon, IC, StatusBadge, Spinner } from "@/components/ui";
 
@@ -231,6 +232,14 @@ export default function MyShop() {
 
         {/* ─── RIGHT COLUMN: Gallery & Verify ─── */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Documents Section */}
+          <ShopDocuments
+            shopId={shop._id}
+            initialDocuments={shop.documents}
+            onUpdate={fetchShop}
+          />
+
+          {/* Gallery Section */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
               <Icon d={IC.image} className="w-5 h-5 text-gray-400" />

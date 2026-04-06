@@ -145,6 +145,23 @@ export default function CertificatePreview({ shop }: CertificatePreviewProps) {
               the federation&apos;s registration policies and regulations.
             </p>
 
+            {/* Shopkeeper photo */}
+            {shop.shopkeeperPhoto && (
+              <div className="flex flex-col items-center gap-1 mt-4">
+                <div className="relative w-24 h-28 border-2 border-gray-300 rounded overflow-hidden shadow-sm">
+                  <Image
+                    src={shop.shopkeeperPhoto}
+                    alt="Shopkeeper"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                  Shopkeeper Photo
+                </p>
+              </div>
+            )}
+
             {/* Details grid */}
             <div className="w-full grid grid-cols-2 gap-x-6 gap-y-3 mt-6 px-2 sm:px-6 text-sm">
               <div>

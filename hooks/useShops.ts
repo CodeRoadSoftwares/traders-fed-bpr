@@ -76,6 +76,17 @@ export function useShops(params: UseShopsParams = {}) {
     }
   };
 
+  const deactivateShop = async (id: string) => {
+    try {
+      await apiClient.post("/shop/deactivate", { id });
+      showToast.success("Shop deactivated successfully!");
+      fetchShops();
+    } catch (error) {
+      showToast.error("Failed to deactivate shop");
+      throw error;
+    }
+  };
+
   return {
     shops,
     pagination,
@@ -83,6 +94,7 @@ export function useShops(params: UseShopsParams = {}) {
     approveShop,
     rejectShop,
     deleteShop,
+    deactivateShop,
     refetch: fetchShops,
   };
 }

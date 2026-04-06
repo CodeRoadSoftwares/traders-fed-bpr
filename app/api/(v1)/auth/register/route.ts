@@ -25,6 +25,8 @@ export async function POST(req: Request) {
       category,
       primaryPhoto,
       photos,
+      shopkeeperPhoto,
+      documents,
     } = parsedShop;
 
     const existingUser = await User.findOne({
@@ -71,6 +73,8 @@ export async function POST(req: Request) {
       category,
       primaryPhoto,
       photos: photos?.length ? photos : [primaryPhoto],
+      shopkeeperPhoto,
+      documents,
       certificateNumber: generateCertificateNumber(),
       certificateStatus: "PENDING",
     });

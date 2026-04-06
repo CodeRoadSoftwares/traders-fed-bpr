@@ -10,11 +10,56 @@ import { ShopCategory } from "@/constants/categories";
 import { Icon, IC } from "@/components/ui";
 import { showToast } from "@/lib/toast";
 
-const STEPS = ["Account", "Address", "Shop Details"];
+const STEPS = ["Account", "Address", "Shop Details", "Documents"];
 
 const inputCls =
   "w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all";
 const labelCls = "block text-sm font-medium text-gray-700 mb-1.5";
+
+type DocKey =
+  | "aadhar"
+  | "pan"
+  | "photograph"
+  | "municipalityCertificate"
+  | "rentOrElectricityBill";
+
+const DOC_FIELDS: {
+  key: DocKey;
+  label: string;
+  accept: string;
+  hint: string;
+}[] = [
+  {
+    key: "photograph",
+    label: "Photograph (Personal)",
+    accept: "image/*",
+    hint: "Recent passport-size photograph of the shopkeeper",
+  },
+  {
+    key: "aadhar",
+    label: "Aadhaar Card",
+    accept: "image/*,application/pdf",
+    hint: "Upload a scan/photo of your Aadhaar card",
+  },
+  {
+    key: "pan",
+    label: "PAN Card",
+    accept: "image/*,application/pdf",
+    hint: "Upload a scan/photo of your PAN card",
+  },
+  {
+    key: "municipalityCertificate",
+    label: "Municipality Certificate",
+    accept: "image/*,application/pdf",
+    hint: "Certificate issued by the local municipality",
+  },
+  {
+    key: "rentOrElectricityBill",
+    label: "Rent Deed or Electricity Bill",
+    accept: "image/*,application/pdf",
+    hint: "Proof of shop premises (rent agreement or latest electricity bill)",
+  },
+];
 
 export default function RegisterForm() {
   const [step, setStep] = useState(1);
@@ -22,6 +67,17 @@ export default function RegisterForm() {
   const [uploading, setUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const photoRef = useRef<HTMLInputElement>(null);
+
+  // Document upload state
+  const [docUploading, setDocUploading] = useState<
+    Partial<Record<DocKey, boolean>>
+  >({});
+  const [docPreviews, setDocPreviews] = useState<
+    Partial<Record<DocKey, string>>
+  >({});
+  const [otherLicenses, setOtherLicenses] = useState<string[]>([]);
+  const [otherUploading, setOtherUploading] = useState(false);
+  const otherRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -36,6 +92,14 @@ export default function RegisterForm() {
     licenseNumber: "",
     category: "",
     primaryPhoto: "",
+    shopkeeperPhoto: "",
+    documents: {
+      aadhar: "",
+      pan: "",
+      photograph: "",
+      municipalityCertificate: "",
+      rentOrElectricityBill: "",
+    } as Record<DocKey, string>,
   });
 
   const router = useRouter();
@@ -64,6 +128,53 @@ export default function RegisterForm() {
     }
   };
 
+  const handleDocUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: DocKey,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDocUploading((prev) => ({ ...prev, [key]: true }));
+    try {
+      const url = await uploadToS3(file, "registration");
+      setForm((prev) => ({
+        ...prev,
+        documents: { ...prev.documents, [key]: url },
+      }));
+      // For photograph, also set shopkeeperPhoto
+      if (key === "photograph") {
+        setForm((prev) => ({ ...prev, shopkeeperPhoto: url }));
+      }
+      setDocPreviews((prev) => ({ ...prev, [key]: url }));
+    } catch {
+      showToast.error("Upload failed");
+    } finally {
+      setDocUploading((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const handleOtherLicenses = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setOtherUploading(true);
+    try {
+      const urls = await Promise.all(
+        Array.from(files).map((f) => uploadToS3(f, "registration")),
+      );
+      setOtherLicenses((prev) => [...prev, ...urls]);
+    } catch {
+      showToast.error("Upload failed");
+    } finally {
+      setOtherUploading(false);
+      if (otherRef.current) otherRef.current.value = "";
+    }
+  };
+
+  const removeOtherLicense = (url: string) =>
+    setOtherLicenses((prev) => prev.filter((u) => u !== url));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.primaryPhoto) {
@@ -80,9 +191,13 @@ export default function RegisterForm() {
           ...form.address,
           pincode: Number(form.address.pincode),
         },
+        documents: {
+          ...form.documents,
+          otherLicenses,
+        },
       });
       showToast.success("Registered! Your shop is pending admin approval.");
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
       showToast.error(ax?.response?.data?.message || "Registration failed");
@@ -102,6 +217,13 @@ export default function RegisterForm() {
   const canProceedStep2 =
     form.address.line1 && form.address.district && form.address.pincode;
 
+  const canProceedStep3 =
+    form.shopName &&
+    form.registrationNumber &&
+    form.licenseNumber &&
+    form.category &&
+    form.primaryPhoto;
+
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
@@ -114,18 +236,18 @@ export default function RegisterForm() {
         </p>
       </div>
 
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-1 mb-6">
         {STEPS.map((label, i) => {
           const s = i + 1;
           return (
-            <div key={s} className="flex items-center gap-2 flex-1">
+            <div key={s} className="flex items-center gap-1 flex-1">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${step >= s ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-400"}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 ${step >= s ? "bg-primary-600 text-white" : "bg-gray-100 text-gray-400"}`}
               >
                 {s}
               </div>
               <p
-                className={`text-xs font-medium ${step >= s ? "text-gray-700" : "text-gray-400"}`}
+                className={`text-[10px] font-medium hidden sm:block ${step >= s ? "text-gray-700" : "text-gray-400"}`}
               >
                 {label}
               </p>
@@ -391,8 +513,175 @@ export default function RegisterForm() {
                   <Icon d={IC.chevronLeft} className="w-4 h-4" /> Back
                 </button>
                 <button
+                  type="button"
+                  disabled={!canProceedStep3}
+                  onClick={() => setStep(4)}
+                  className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  Continue <Icon d={IC.chevronRight} className="w-4 h-4" />
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                Upload the required documents. Accepted formats: images (JPG,
+                PNG) and PDF.
+              </p>
+
+              {DOC_FIELDS.map(({ key, label, accept, hint }) => {
+                const uploaded = form.documents[key];
+                const isImg = uploaded && !uploaded.endsWith(".pdf");
+                return (
+                  <div key={key}>
+                    <label className={labelCls}>{label}</label>
+                    <p className="text-xs text-gray-400 mb-1.5">{hint}</p>
+                    {uploaded ? (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        {isImg ? (
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-200">
+                            <Image
+                              src={uploaded}
+                              alt={label}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center shrink-0">
+                            <Icon
+                              d={IC.fileText}
+                              className="w-6 h-6 text-primary-500"
+                            />
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-600 flex-1 truncate">
+                          Uploaded
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => ({
+                              ...prev,
+                              documents: { ...prev.documents, [key]: "" },
+                            }));
+                            setDocPreviews((prev) => ({ ...prev, [key]: "" }));
+                          }}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Icon d={IC.x} className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="w-full h-20 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:border-primary-400 hover:text-primary-500 transition-colors cursor-pointer">
+                        {docUploading[key] ? (
+                          <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <Icon d={IC.paperclip} className="w-5 h-5" />
+                            <span className="text-xs">Click to upload</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept={accept}
+                          className="hidden"
+                          onChange={(e) => handleDocUpload(e, key)}
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Other govt licenses - multi file */}
+              <div>
+                <label className={labelCls}>
+                  Other Govt. Licenses{" "}
+                  <span className="text-gray-400 font-normal">
+                    (optional, multi-file)
+                  </span>
+                </label>
+                <p className="text-xs text-gray-400 mb-1.5">
+                  Any other license issued by Govt. of India (FSSAI, GST, etc.)
+                </p>
+                <input
+                  ref={otherRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={handleOtherLicenses}
+                />
+                {otherLicenses.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {otherLicenses.map((url, i) => {
+                      const isImg = !url.endsWith(".pdf");
+                      return (
+                        <div key={url} className="relative group">
+                          {isImg ? (
+                            <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200">
+                              <Image
+                                src={url}
+                                alt={`License ${i + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-14 h-14 bg-primary-50 rounded-lg flex items-center justify-center border border-primary-100">
+                              <Icon
+                                d={IC.fileText}
+                                className="w-6 h-6 text-primary-500"
+                              />
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeOtherLicense(url)}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Icon d={IC.x} className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => otherRef.current?.click()}
+                  disabled={otherUploading}
+                  className="w-full h-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 text-gray-400 hover:border-primary-400 hover:text-primary-500 transition-colors disabled:opacity-50 text-xs"
+                >
+                  {otherUploading ? (
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Icon d={IC.plus} className="w-4 h-4" />
+                      Add files
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Icon d={IC.chevronLeft} className="w-4 h-4" /> Back
+                </button>
+                <button
                   type="submit"
-                  disabled={loading || uploading}
+                  disabled={
+                    loading ||
+                    otherUploading ||
+                    Object.values(docUploading).some(Boolean)
+                  }
                   className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {loading ? (

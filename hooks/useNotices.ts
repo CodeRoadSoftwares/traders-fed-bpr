@@ -69,12 +69,33 @@ export function useNotices(params: UseNoticesParams = {}) {
     }
   };
 
+  const updateNotice = async (
+    id: string,
+    data: {
+      title: string;
+      message: string;
+      visibility: string;
+      urgent: boolean;
+      attachments?: { url: string; name: string; type: "image" | "pdf" }[];
+    },
+  ) => {
+    try {
+      await apiClient.put("/notice/update", { id, ...data });
+      showToast.success("Notice updated successfully!");
+      fetchNotices();
+    } catch (error) {
+      showToast.error("Failed to update notice");
+      throw error;
+    }
+  };
+
   return {
     notices,
     pagination,
     loading,
     createNotice,
     deleteNotice,
+    updateNotice,
     refetch: fetchNotices,
   };
 }

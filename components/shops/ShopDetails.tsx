@@ -15,6 +15,7 @@ import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
 import { showToast } from "@/lib/toast";
 import ShopPhotos from "@/components/shop/ShopPhotos";
+import ShopDocuments from "@/components/shop/ShopDocuments";
 
 /* ── Fullscreen image lightbox ── */
 function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
@@ -107,6 +108,28 @@ export default function ShopDetails({
       params.then((p) => fetchShop(p.id));
     } catch {
       showToast.error("Failed to renew certificate");
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!shop) return;
+    try {
+      await apiClient.post("/shop/deactivate", { id: shop._id });
+      showToast.success("Shop deactivated");
+      params.then((p) => fetchShop(p.id));
+    } catch {
+      showToast.error("Failed to deactivate shop");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!shop) return;
+    try {
+      await apiClient.delete("/shop/delete", { data: { id: shop._id } });
+      showToast.success("Shop deleted");
+      window.location.href = "/shops";
+    } catch {
+      showToast.error("Failed to delete shop");
     }
   };
 
@@ -255,6 +278,15 @@ export default function ShopDetails({
 
         {/* ─── LEFT COLUMN: Details ─── */}
         <div className="lg:col-span-3 lg:order-1 space-y-6">
+          {/* Owner Document Management */}
+          {isOwner && (
+            <ShopDocuments
+              shopId={shop._id}
+              initialDocuments={shop.documents}
+              onUpdate={() => params.then((p) => fetchShop(p.id))}
+            />
+          )}
+
           {/* Header card */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600" />
@@ -326,6 +358,42 @@ export default function ShopDetails({
                   >
                     <Icon d={IC.refresh} className="w-4 h-4" /> Renew
                   </Btn>
+                )}
+                {isAdmin && (
+                  <>
+                    {shop.certificateStatus === "ACTIVE" && (
+                      <Btn
+                        onClick={() =>
+                          setConfirmDialog({
+                            title: "Deactivate Shop",
+                            message:
+                              "Deactivate this shop? It will be removed from the directory.",
+                            action: handleDeactivate,
+                            danger: true,
+                          })
+                        }
+                        variant="danger"
+                        className="shadow-sm"
+                      >
+                        Deactivate
+                      </Btn>
+                    )}
+                    <Btn
+                      onClick={() =>
+                        setConfirmDialog({
+                          title: "Delete Shop",
+                          message:
+                            "Permanently delete this shop? This cannot be undone.",
+                          action: handleDelete,
+                          danger: true,
+                        })
+                      }
+                      variant="danger"
+                      className="shadow-sm"
+                    >
+                      <Icon d={IC.trash} className="w-4 h-4" /> Delete
+                    </Btn>
+                  </>
                 )}
               </div>
             </div>
@@ -465,6 +533,151 @@ export default function ShopDetails({
               ))}
             </div>
           </div>
+
+          {/* Documents Section - Admin Only */}
+          {isAdmin && (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-5">
+                <Icon d={IC.fileText} className="w-5 h-5 text-gray-400" />
+                <p className="text-sm font-bold text-gray-900 uppercase tracking-widest">
+                  Uploaded Documents
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { key: "photograph", label: "Shopkeeper Photograph" },
+                  { key: "aadhar", label: "Aadhaar Card" },
+                  { key: "pan", label: "PAN Card" },
+                  {
+                    key: "municipalityCertificate",
+                    label: "Municipality Certificate",
+                  },
+                  {
+                    key: "rentOrElectricityBill",
+                    label: "Rent Deed / Electricity Bill",
+                  },
+                ].map(({ key, label }) => {
+                  const url = shop.documents?.[
+                    key as keyof typeof shop.documents
+                  ] as string | undefined;
+                  if (!url) return null;
+
+                  const isPdf = url.endsWith(".pdf");
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors group"
+                    >
+                      {isPdf ? (
+                        <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center shrink-0 border border-primary-100">
+                          <Icon
+                            d={IC.fileText}
+                            className="w-7 h-7 text-primary-500"
+                          />
+                        </div>
+                      ) : (
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-gray-200 cursor-pointer">
+                          <Image
+                            src={url}
+                            alt={label}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform"
+                            onClick={() => setLightboxSrc(url)}
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                          {label}
+                        </p>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1.5 group-hover:underline"
+                        >
+                          View Document
+                          <Icon
+                            d={IC.externalLink}
+                            className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Other Licenses */}
+                {shop.documents?.otherLicenses &&
+                  shop.documents.otherLicenses.length > 0 && (
+                    <div className="md:col-span-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                        Other Government Licenses
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {shop.documents.otherLicenses.map((url, idx) => {
+                          const isPdf = url.endsWith(".pdf");
+                          return (
+                            <a
+                              key={idx}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative"
+                            >
+                              {isPdf ? (
+                                <div className="w-20 h-20 bg-primary-50 rounded-xl flex flex-col items-center justify-center border border-primary-100 hover:border-primary-300 transition-colors">
+                                  <Icon
+                                    d={IC.fileText}
+                                    className="w-8 h-8 text-primary-500"
+                                  />
+                                  <span className="text-[10px] text-primary-600 font-medium mt-1">
+                                    PDF
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors">
+                                  <Image
+                                    src={url}
+                                    alt={`License ${idx + 1}`}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform"
+                                  />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors flex items-center justify-center">
+                                <Icon
+                                  d={IC.externalLink}
+                                  className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg"
+                                />
+                              </div>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+              </div>
+
+              {!shop.documents?.photograph &&
+                !shop.documents?.aadhar &&
+                !shop.documents?.pan &&
+                !shop.documents?.municipalityCertificate &&
+                !shop.documents?.rentOrElectricityBill &&
+                (!shop.documents?.otherLicenses ||
+                  shop.documents.otherLicenses.length === 0) && (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <Icon d={IC.fileText} className="w-6 h-6 text-gray-300" />
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      No documents uploaded yet
+                    </p>
+                  </div>
+                )}
+            </div>
+          )}
         </div>
       </div>
 

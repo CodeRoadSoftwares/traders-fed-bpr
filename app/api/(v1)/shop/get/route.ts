@@ -64,6 +64,8 @@ export async function GET(req: NextRequest) {
           category: 1,
           photos: 1,
           primaryPhoto: 1,
+          shopkeeperPhoto: 1,
+          documents: 1,
           location: 1,
           certificateNumber: 1,
           certificateStatus: 1,

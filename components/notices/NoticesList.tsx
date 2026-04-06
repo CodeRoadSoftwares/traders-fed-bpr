@@ -5,6 +5,7 @@ import { useNotices } from "@/hooks/useNotices";
 import { useUser } from "@/hooks/useUser";
 import { Notice, NoticeAttachment } from "@/types";
 import CreateNoticeModal from "./CreateNoticeModal";
+import EditNoticeModal from "./EditNoticeModal";
 import NoticeDetailModal from "@/components/dashboard/NoticeDetailModal";
 import {
   Icon,
@@ -22,6 +23,7 @@ export default function NoticesList() {
   const [showModal, setShowModal] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [editNotice, setEditNotice] = useState<Notice | null>(null);
 
   const { notices, pagination, loading, deleteNotice, refetch } = useNotices({
     page,
@@ -133,16 +135,40 @@ export default function NoticesList() {
                     </div>
 
                     {isAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDelete(notice._id);
-                        }}
-                        className="p-1.5 text-gray-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors border border-transparent hover:border-danger-100"
-                        title="Delete Notice"
-                      >
-                        <Icon d={IC.trash} className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditNotice(notice);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors border border-transparent hover:border-primary-100"
+                          title="Edit Notice"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.8}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDelete(notice._id);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors border border-transparent hover:border-danger-100"
+                          title="Delete Notice"
+                        >
+                          <Icon d={IC.trash} className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -206,6 +232,14 @@ export default function NoticesList() {
       {showModal && (
         <CreateNoticeModal
           onClose={() => setShowModal(false)}
+          onSuccess={refetch}
+        />
+      )}
+
+      {editNotice && (
+        <EditNoticeModal
+          notice={editNotice}
+          onClose={() => setEditNotice(null)}
           onSuccess={refetch}
         />
       )}

@@ -27,6 +27,16 @@ const shopSchema = new Schema(
       default: "PENDING",
     },
     actionBy: { type: Types.ObjectId, ref: "User" },
+    isActive: { type: Boolean, default: true },
+    shopkeeperPhoto: { type: String },
+    documents: {
+      aadhar: { type: String },
+      pan: { type: String },
+      photograph: { type: String },
+      municipalityCertificate: { type: String },
+      rentOrElectricityBill: { type: String },
+      otherLicenses: [{ type: String }],
+    },
   },
   { timestamps: true },
 );

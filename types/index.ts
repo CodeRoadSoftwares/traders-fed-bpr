@@ -33,6 +33,16 @@ export interface Shop {
   certificateExpiryDate?: string;
   certificateStatus: "PENDING" | "ACTIVE" | "REJECTED" | "EXPIRED";
   actionBy?: string;
+  isActive?: boolean;
+  shopkeeperPhoto?: string;
+  documents?: {
+    aadhar?: string;
+    pan?: string;
+    photograph?: string;
+    municipalityCertificate?: string;
+    rentOrElectricityBill?: string;
+    otherLicenses?: string[];
+  };
   createdAt: string;
   updatedAt: string;
   user?: {

@@ -21,7 +21,15 @@ export default function ShopsList() {
     title: string;
     message: string;
   } | null>(null);
-  const { shops, pagination, loading, approveShop, rejectShop } = useShops({
+  const {
+    shops,
+    pagination,
+    loading,
+    approveShop,
+    rejectShop,
+    deleteShop,
+    deactivateShop,
+  } = useShops({
     page,
     status,
     search,
@@ -195,6 +203,35 @@ export default function ShopsList() {
                             </button>
                           </>
                         )}
+                        <span className="text-gray-200">|</span>
+                        {shop.certificateStatus === "ACTIVE" && (
+                          <button
+                            onClick={() =>
+                              setConfirm({
+                                title: "Deactivate Shop",
+                                message:
+                                  "Deactivate this shop? It will be removed from the directory.",
+                                action: () => deactivateShop(shop._id),
+                              })
+                            }
+                            className="text-xs px-2 py-1 bg-warning-50 text-warning-700 hover:bg-warning-100 rounded font-medium transition-colors"
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                        <button
+                          onClick={() =>
+                            setConfirm({
+                              title: "Delete Shop",
+                              message:
+                                "Permanently delete this shop? This cannot be undone.",
+                              action: () => deleteShop(shop._id),
+                            })
+                          }
+                          className="text-xs px-2 py-1 bg-danger-50 text-danger-700 hover:bg-danger-100 rounded font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -213,7 +250,11 @@ export default function ShopsList() {
         <ConfirmDialog
           title={confirm.title}
           message={confirm.message}
-          danger={confirm.title.toLowerCase().includes("reject")}
+          danger={
+            confirm.title.toLowerCase().includes("reject") ||
+            confirm.title.toLowerCase().includes("delete") ||
+            confirm.title.toLowerCase().includes("deactivate")
+          }
           confirmLabel={confirm.title.split(" ")[0]}
           onConfirm={() => {
             confirm.action();
