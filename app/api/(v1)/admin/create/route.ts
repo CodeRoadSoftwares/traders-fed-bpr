@@ -14,8 +14,11 @@ export async function POST(req: Request) {
     }
     const data = await req.json();
     const parsedData: IAdmin = adminSchema.parse(data);
-    const { email, password, phone, name } = parsedData;
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    const { email, password, phone, name, fatherName, aadharNumber } =
+      parsedData;
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }, { aadharNumber }],
+    });
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists" },
@@ -25,6 +28,8 @@ export async function POST(req: Request) {
     const hashedPassword = await hash(password, 10);
     const newAdmin = await User.create({
       name,
+      fatherName,
+      aadharNumber,
       email,
       phone,
       password: hashedPassword,

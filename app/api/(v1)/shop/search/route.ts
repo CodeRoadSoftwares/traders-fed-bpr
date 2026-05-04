@@ -2,10 +2,17 @@ import { connectDb } from "@/lib/db/db";
 import { Shop } from "@/lib/db/models";
 import { NextRequest, NextResponse } from "next/server";
 import { PipelineStage } from "mongoose";
+import { getUser } from "@/lib/auth/getUser";
 
 export async function GET(req: NextRequest) {
   try {
     await connectDb();
+    const user = await getUser();
+    const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+    if (!isAdmin) {
+      return NextResponse.json({ message: "unauthorized" }, { status: 403 });
+    }
+
     const query = req.nextUrl.searchParams.get("q");
     const category = req.nextUrl.searchParams.get("category");
     const district = req.nextUrl.searchParams.get("district");

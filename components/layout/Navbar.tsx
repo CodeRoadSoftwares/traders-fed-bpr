@@ -13,9 +13,7 @@ const HOME_ICON =
 // Nav link definitions with icons
 const publicLinks = [
   { href: "/", label: "Home", icon: HOME_ICON },
-  { href: "/directory", label: "Directory", icon: IC.building },
   { href: "/notices", label: "Notices", icon: IC.notice },
-  { href: "/funds", label: "Funds", icon: IC.fund },
   { href: "/verify", label: "Verify", icon: IC.shield },
 ];
 
@@ -27,14 +25,15 @@ function getAuthLinks(role: string) {
       ? [{ href: "/my-shop", label: "My Shop", icon: IC.shop }]
       : []),
     { href: "/notices", label: "Notices", icon: IC.notice },
+    { href: "/funds", label: "Funds", icon: IC.fund },
     ...(isAdmin
       ? [
+          { href: "/directory", label: "Directory", icon: IC.building },
           { href: "/carousel", label: "Carousel", icon: IC.image },
           { href: "/shops", label: "Shops", icon: IC.shop },
           { href: "/certificates", label: "Certificates", icon: IC.check },
-          { href: "/funds", label: "Funds", icon: IC.fund },
         ]
-      : [{ href: "/funds", label: "Funds", icon: IC.fund }]),
+      : []),
     ...(role === "SUPER_ADMIN"
       ? [{ href: "/admins", label: "Admins", icon: IC.user }]
       : []),

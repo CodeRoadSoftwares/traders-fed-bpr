@@ -8,13 +8,10 @@ const publicPaths = [
   "/api/auth/verify-otp",
   "/api/auth/reset-password",
   "/api/upload/presign",
-  "/api/shop/search",
-  "/api/shop/get",
   "/api/shop/categories",
   "/api/districts",
   "/api/certificate/verify",
   "/api/notice/get",
-  "/api/fund/get",
   "/api/cron",
 ];
 
@@ -33,6 +30,8 @@ const adminPaths = [
   "/api/fund/report",
   "/api/stats",
   "/api/shop/delete",
+  "/api/shop/search",
+  "/api/shop/get",
 ];
 
 const superAdminPaths = [
@@ -49,6 +48,8 @@ const protectedPagePaths = [
   "/certificates",
   "/carousel",
   "/admins",
+  "/funds",
+  "/directory",
 ];
 
 function decodeJWT(token: string): { id: string; role: string } | null {

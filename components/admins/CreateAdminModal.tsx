@@ -7,6 +7,8 @@ export default function CreateAdminModal({ onClose }: { onClose: () => void }) {
   const { createAdmin } = useAdmins();
   const [form, setForm] = useState({
     name: "",
+    fatherName: "",
+    aadharNumber: "",
     email: "",
     password: "",
     phone: "",
@@ -37,6 +39,27 @@ export default function CreateAdminModal({ onClose }: { onClose: () => void }) {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className={inputCls}
             placeholder="Admin name"
+          />
+        </Field>
+        <Field label="Father's Name">
+          <input
+            type="text"
+            required
+            value={form.fatherName}
+            onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+            className={inputCls}
+            placeholder="Father's name"
+          />
+        </Field>
+        <Field label="Aadhar Number">
+          <input
+            type="text"
+            required
+            maxLength={12}
+            value={form.aadharNumber}
+            onChange={(e) => setForm({ ...form, aadharNumber: e.target.value })}
+            className={inputCls}
+            placeholder="12-digit Aadhar number"
           />
         </Field>
         <Field label="Email Address">

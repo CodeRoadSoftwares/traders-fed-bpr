@@ -571,10 +571,15 @@ export function NoticesSection({
 export function ShopsSection({
   shops,
   loading,
+  isAdmin,
 }: {
   shops: Shop[];
   loading: boolean;
+  isAdmin?: boolean;
 }) {
+  // Only show this section for admins
+  if (!isAdmin) return null;
+
   return (
     <section>
       <div className="flex items-center justify-between mb-5 sm:mb-6">
@@ -826,7 +831,7 @@ export function CTABanner() {
   );
 }
 
-export function HomeFooter() {
+export function HomeFooter({ isAdmin }: { isAdmin?: boolean }) {
   return (
     <footer className="bg-gray-900 text-gray-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 pb-24 md:pb-12">
@@ -851,7 +856,9 @@ export function HomeFooter() {
             </h4>
             <ul className="space-y-2 text-sm">
               {[
-                { href: "/directory", label: "Shop Directory" },
+                ...(isAdmin
+                  ? [{ href: "/directory", label: "Shop Directory" }]
+                  : []),
                 { href: "/verify", label: "Verify Certificate" },
                 { href: "/notices", label: "Public Notices" },
                 { href: "/register", label: "Register Shop" },

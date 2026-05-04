@@ -1,10 +1,16 @@
 import { connectDb } from "@/lib/db/db";
 import { Fund } from "@/lib/db/models";
 import { NextRequest, NextResponse } from "next/server";
+import { getUser } from "@/lib/auth/getUser";
 
 export async function GET(req: NextRequest) {
   try {
     await connectDb();
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ message: "unauthorized" }, { status: 401 });
+    }
+
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 10;
     const type = req.nextUrl.searchParams.get("type");

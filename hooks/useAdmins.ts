@@ -28,6 +28,8 @@ export function useAdmins(page = 1) {
 
   const createAdmin = async (data: {
     name: string;
+    fatherName: string;
+    aadharNumber: string;
     email: string;
     password: string;
     phone: number;

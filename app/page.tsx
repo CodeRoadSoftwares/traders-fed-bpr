@@ -28,28 +28,45 @@ export default function HomePage() {
   });
   const [loading, setLoading] = useState(true);
 
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
   useEffect(() => {
-    Promise.all([
-      apiClient.get("/shop/get", { params: { status: "ACTIVE", limit: 6 } }),
-      apiClient.get("/notice/get", {
-        params: { limit: 4, visibility: "PUBLIC" },
-      }),
-    ])
-      .then(([shopsRes, noticesRes]) => {
-        setShops(shopsRes.data.data || []);
-        setNotices(noticesRes.data.data || []);
-        setStats({
-          totalShops: shopsRes.data.pagination?.total || 0,
-          activeShops:
-            shopsRes.data.data?.filter(
-              (s: Shop) => s.certificateStatus === "ACTIVE",
-            ).length || 0,
-          totalNotices: noticesRes.data.pagination?.total || 0,
+    const fetchData = async () => {
+      try {
+        const noticesRes = await apiClient.get("/notice/get", {
+          params: { limit: 4, visibility: "PUBLIC" },
         });
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+
+        setNotices(noticesRes.data.data || []);
+        setStats((prev) => ({
+          ...prev,
+          totalNotices: noticesRes.data.pagination?.total || 0,
+        }));
+
+        // Only fetch shops if user is admin
+        if (isAdmin) {
+          const shopsRes = await apiClient.get("/shop/get", {
+            params: { status: "ACTIVE", limit: 6 },
+          });
+          setShops(shopsRes.data.data || []);
+          setStats((prev) => ({
+            ...prev,
+            totalShops: shopsRes.data.pagination?.total || 0,
+            activeShops:
+              shopsRes.data.data?.filter(
+                (s: Shop) => s.certificateStatus === "ACTIVE",
+              ).length || 0,
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isAdmin]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
@@ -59,13 +76,13 @@ export default function HomePage() {
       <HomeStatsBar stats={stats} loading={loading} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-8 sm:space-y-14">
         <NoticesSection notices={notices} loading={loading} />
-        <ShopsSection shops={shops} loading={loading} />
+        <ShopsSection shops={shops} loading={loading} isAdmin={isAdmin} />
         <VerifyCTA />
       </div>
       <HomeFeatures />
       <HowItWorks />
       {!user && <CTABanner />}
-      <HomeFooter />
+      <HomeFooter isAdmin={isAdmin} />
     </div>
   );
 }
