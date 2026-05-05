@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useNotices } from "@/hooks/useNotices";
 import { useUser } from "@/hooks/useUser";
+import { useShopApproval } from "@/hooks/useShopApproval";
 import { Notice, NoticeAttachment } from "@/types";
 import CreateNoticeModal from "./CreateNoticeModal";
 import EditNoticeModal from "./EditNoticeModal";
@@ -29,6 +31,7 @@ export default function NoticesList() {
     page,
   });
   const { user } = useUser();
+  const { isApproved, loading: approvalLoading, isShop } = useShopApproval();
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
   const images = (attachments?: NoticeAttachment[]) =>
@@ -58,7 +61,29 @@ export default function NoticesList() {
         )}
       </div>
 
-      {loading ? (
+      {/* Show approval message for unapproved shops */}
+      {isShop && !approvalLoading && !isApproved && (
+        <div className="bg-warning-50 border border-warning-200 rounded-2xl p-6 text-center">
+          <div className="w-14 h-14 bg-warning-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Icon d={IC.alert} className="w-7 h-7 text-warning-600" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">
+            Approval Required
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Shop-specific notices are only available after your shop certificate
+            is approved. You can still view public notices.
+          </p>
+          <Link
+            href="/my-shop"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary-700 transition-colors"
+          >
+            View My Shop <Icon d={IC.chevronRight} className="w-4 h-4" />
+          </Link>
+        </div>
+      )}
+
+      {loading || (isShop && approvalLoading) ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <div

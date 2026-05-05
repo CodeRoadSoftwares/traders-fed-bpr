@@ -24,7 +24,13 @@ export async function GET(req: NextRequest) {
     if (!user) {
       match.visibility = "PUBLIC";
     } else if (user.role === "SHOP") {
-      match.visibility = { $in: ["PUBLIC", "SHOPS"] };
+      const { Shop } = await import("@/lib/db/models");
+      const shop = await Shop.findOne({ userId: user.id });
+      if (!shop || shop.certificateStatus !== "ACTIVE") {
+        match.visibility = "PUBLIC";
+      } else {
+        match.visibility = { $in: ["PUBLIC", "SHOPS"] };
+      }
     }
 
     if (startDate || endDate) {

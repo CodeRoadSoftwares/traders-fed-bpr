@@ -11,6 +11,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "unauthorized" }, { status: 401 });
     }
 
+    if (user.role === "SHOP") {
+      const { Shop } = await import("@/lib/db/models");
+      const shop = await Shop.findOne({ userId: user.id });
+      if (!shop || shop.certificateStatus !== "ACTIVE") {
+        return NextResponse.json(
+          { message: "Shop must be approved to view funds" },
+          { status: 403 },
+        );
+      }
+    }
+
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 10;
     const type = req.nextUrl.searchParams.get("type");

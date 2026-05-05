@@ -9,7 +9,22 @@ export async function GET(req: NextRequest) {
     await connectDb();
     const user = await getUser();
     const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
-    if (!isAdmin) {
+    const isShop = user?.role === "SHOP";
+
+    // Check if shop is approved
+    if (isShop) {
+      const { Shop } = await import("@/lib/db/models");
+      const shop = await Shop.findOne({ userId: user.id });
+      if (!shop || shop.certificateStatus !== "ACTIVE") {
+        return NextResponse.json(
+          { message: "Shop must be approved to view directory" },
+          { status: 403 },
+        );
+      }
+    }
+
+    // Allow admins and approved shops
+    if (!isAdmin && !isShop) {
       return NextResponse.json({ message: "unauthorized" }, { status: 403 });
     }
 

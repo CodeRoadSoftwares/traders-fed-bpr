@@ -57,14 +57,26 @@ export default function ShopDashboard({
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      apiClient.get("/shop/my-shop").catch(() => null),
-      apiClient.get("/notice/get", { params: { limit: 4 } }).catch(() => null),
-    ])
-      .then(([s, n]) => {
-        if (s?.data) setShop(s.data);
-        else setShopError(true);
-        if (n?.data?.data) setNotices(n.data.data);
+    apiClient
+      .get("/shop/my-shop")
+      .then((s) => {
+        if (s?.data) {
+          setShop(s.data);
+          // Only fetch notices if shop is approved
+          if (s.data.certificateStatus === "ACTIVE") {
+            apiClient
+              .get("/notice/get", { params: { limit: 4 } })
+              .then((n) => {
+                if (n?.data?.data) setNotices(n.data.data);
+              })
+              .catch(() => {});
+          }
+        } else {
+          setShopError(true);
+        }
+      })
+      .catch(() => {
+        setShopError(true);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -80,11 +92,15 @@ export default function ShopDashboard({
     ? statusConfig[shop.certificateStatus] || statusConfig.PENDING
     : null;
 
+  const isApproved = shop?.certificateStatus === "ACTIVE";
   const quickLinks = [
     { href: "/my-shop", label: "My Shop", icon: IC.shop },
-    { href: "/notices", label: "Notices", icon: IC.notice },
-    { href: "/directory", label: "Directory", icon: IC.building },
-    { href: "/funds", label: "Funds", icon: IC.fund },
+    ...(isApproved
+      ? [
+          { href: "/notices", label: "Notices", icon: IC.notice },
+          { href: "/funds", label: "Funds", icon: IC.fund },
+        ]
+      : []),
     { href: "/verify", label: "Verify", icon: IC.shield },
   ];
 
@@ -269,68 +285,70 @@ export default function ShopDashboard({
         </div>
       </div>
 
-      {/* Notices */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-            Latest Notices
-          </p>
-          <Link
-            href="/notices"
-            className="text-xs text-primary-600 font-medium flex items-center gap-0.5"
-          >
-            All <Icon d={IC.chevronRight} className="w-3 h-3" />
-          </Link>
-        </div>
+      {/* Notices - Only show if approved */}
+      {isApproved && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              Latest Notices
+            </p>
+            <Link
+              href="/notices"
+              className="text-xs text-primary-600 font-medium flex items-center gap-0.5"
+            >
+              All <Icon d={IC.chevronRight} className="w-3 h-3" />
+            </Link>
+          </div>
 
-        <div className="space-y-2">
-          {loading ? (
-            [...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl border border-gray-100 p-3.5 space-y-2 shadow-sm"
-              >
-                <Sk className="h-4 w-3/4" />
-                <Sk className="h-3 w-full" />
-                <Sk className="h-3 w-1/2" />
-              </div>
-            ))
-          ) : notices.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-100 p-6 text-center shadow-sm">
-              <p className="text-sm text-gray-400">No notices at this time</p>
-            </div>
-          ) : (
-            notices.map((n) => (
-              <div
-                key={n._id}
-                onClick={() => setSelectedNotice(n)}
-                className={`bg-white rounded-xl border p-3.5 cursor-pointer active:bg-gray-50 transition-colors shadow-sm ${n.urgent ? "border-l-4 border-l-danger-500 border-gray-100" : "border-gray-100"}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-gray-900 line-clamp-1 flex-1">
-                    {n.title}
-                  </p>
-                  {n.urgent && (
-                    <span className="text-[10px] font-bold text-danger-600 bg-danger-50 px-1.5 py-0.5 rounded border border-danger-100 shrink-0">
-                      URGENT
-                    </span>
-                  )}
+          <div className="space-y-2">
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl border border-gray-100 p-3.5 space-y-2 shadow-sm"
+                >
+                  <Sk className="h-4 w-3/4" />
+                  <Sk className="h-3 w-full" />
+                  <Sk className="h-3 w-1/2" />
                 </div>
-                <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">
-                  {n.message}
-                </p>
-                <p className="text-[11px] text-gray-300 mt-2">
-                  {new Date(n.createdAt).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
+              ))
+            ) : notices.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-100 p-6 text-center shadow-sm">
+                <p className="text-sm text-gray-400">No notices at this time</p>
               </div>
-            ))
-          )}
+            ) : (
+              notices.map((n) => (
+                <div
+                  key={n._id}
+                  onClick={() => setSelectedNotice(n)}
+                  className={`bg-white rounded-xl border p-3.5 cursor-pointer active:bg-gray-50 transition-colors shadow-sm ${n.urgent ? "border-l-4 border-l-danger-500 border-gray-100" : "border-gray-100"}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900 line-clamp-1 flex-1">
+                      {n.title}
+                    </p>
+                    {n.urgent && (
+                      <span className="text-[10px] font-bold text-danger-600 bg-danger-50 px-1.5 py-0.5 rounded border border-danger-100 shrink-0">
+                        URGENT
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                    {n.message}
+                  </p>
+                  <p className="text-[11px] text-gray-300 mt-2">
+                    {new Date(n.createdAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Account info */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
